@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shinobi-online.example/public/latest.schema.json",
+  "title": "Shinobi Online latest release manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "game",
+    "channel",
+    "version",
+    "status",
+    "installerUrl",
+    "sha256",
+    "sizeBytes",
+    "releaseNotesUrl",
+    "minimumLauncherVersion",
+    "publishedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "game": {
+      "const": "Shinobi Online"
+    },
+    "channel": {
+      "enum": ["production", "staging"]
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "status": {
+      "enum": ["pending-release", "available", "withdrawn"]
+    },
+    "installerFileName": {
+      "type": ["string", "null"]
+    },
+    "installerUrl": {
+      "type": ["string", "null"]
+    },
+    "sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sizeBytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "releaseNotesUrl": {
+      "type": "string"
+    },
+    "minimumLauncherVersion": {
+      "type": "string"
+    },
+    "publishedAt": {
+      "type": ["string", "null"]
+    },
+    "message": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "available"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "installerFileName": {
+            "type": "string"
+          },
+          "installerUrl": {
+            "type": "string",
+            "pattern": "^https://github\\.com/frizas/shinobi-online/releases/download/"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "publishedAt": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

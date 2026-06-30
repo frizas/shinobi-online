@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Download Shinobi Online and follow public release updates.">
+    <title>Shinobi Online</title>
+    <link rel="preload" href="/assets/shinobi-online-hero.png" as="image">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <img class="hero__image" src="/assets/shinobi-online-hero.png" alt="">
+        <div class="hero__shade"></div>
+        <div class="hero__content">
+          <p class="eyebrow">Public distribution</p>
+          <h1 id="page-title">Shinobi Online</h1>
+          <p class="lede">The player-facing build channel for the Shinobi Online client.</p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="https://github.com/frizas/shinobi-online/releases">GitHub Releases</a>
+            <a class="button button--secondary" href="/public/latest.json">Latest Manifest</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="status-band" aria-labelledby="status-title">
+        <div class="status-band__inner">
+          <div>
+            <p class="eyebrow">Current build</p>
+            <h2 id="status-title">Release status</h2>
+          </div>
+          <div class="status-grid" id="release-status">
+            <article class="status-card">
+              <span class="label">Version</span>
+              <strong id="release-version">Loading</strong>
+            </article>
+            <article class="status-card">
+              <span class="label">Channel</span>
+              <strong id="release-channel">Loading</strong>
+            </article>
+            <article class="status-card">
+              <span class="label">Installer</span>
+              <strong id="release-installer">Loading</strong>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-band" aria-labelledby="downloads-title">
+        <div class="content-band__inner">
+          <div class="section-heading">
+            <p class="eyebrow">Downloads</p>
+            <h2 id="downloads-title">Player package</h2>
+          </div>
+          <div class="download-row">
+            <div>
+              <p id="download-copy">Checking the latest public build manifest.</p>
+              <p class="meta" id="release-meta"></p>
+            </div>
+            <a class="button button--download is-disabled" id="download-link" href="https://github.com/frizas/shinobi-online/releases" aria-disabled="true">Open releases</a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

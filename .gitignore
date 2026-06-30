@@ -1,0 +1,11 @@
+.vercel/
+.codex-local/
+node_modules/
+dist/
+*.log
+*.tmp
+*.zip
+*.exe
+
+!assets/
+!assets/**
