@@ -1,11 +1,12 @@
 async function loadLatestManifest() {
   const versionEl = document.querySelector("#release-version");
-  const channelEl = document.querySelector("#release-channel");
   const installerEl = document.querySelector("#release-installer");
+  const sizeEl = document.querySelector("#release-size");
   const copyEl = document.querySelector("#download-copy");
   const metaEl = document.querySelector("#release-meta");
   const linkEl = document.querySelector("#download-link");
-  const compatibilityEl = document.querySelector("#compatibility-requirements");
+  const compatibilityEl = document.querySelector("#compatibility-summary");
+  const notesEl = document.querySelector("#release-notes-link");
 
   try {
     const response = await fetch("/public/latest.json", { cache: "no-store" });
@@ -23,21 +24,25 @@ async function loadLatestManifest() {
       installer.sizeBytes > 0
     );
 
-    versionEl.textContent = manifest.version || "Unpublished";
-    channelEl.textContent = manifest.channel || "production";
-    installerEl.textContent = hasInstaller ? "Available" : "Pending";
-    renderCompatibility(compatibilityEl, manifest.compatibility);
+    versionEl.textContent = manifest.version ? `v${manifest.version}` : "Unpublished";
+    installerEl.textContent = hasInstaller ? installer.fileName || "Ready" : "Pending";
+    sizeEl.textContent = hasInstaller ? formatBytes(installer.sizeBytes) : "Unavailable";
+    renderCompatibilitySummary(compatibilityEl, manifest.compatibility);
+
+    if (notesEl && manifest.releaseNotesUrl) {
+      notesEl.href = manifest.releaseNotesUrl;
+    }
 
     if (hasInstaller) {
-      copyEl.textContent = `Shinobi Online ${manifest.version} is available.`;
-      metaEl.textContent = `SHA-256 ${installer.sha256} | ${formatBytes(installer.sizeBytes)}`;
+      copyEl.textContent = manifest.message || `Shinobi Online ${manifest.version} is available.`;
+      metaEl.textContent = `SHA-256 ${shortHash(installer.sha256)}`;
       linkEl.href = installer.url;
-      linkEl.textContent = "Download installer";
+      linkEl.textContent = "Download for Windows";
       linkEl.classList.remove("is-disabled");
       linkEl.removeAttribute("aria-disabled");
     } else {
       copyEl.textContent = manifest.message || "The first public installer has not been published yet.";
-      metaEl.textContent = "Public downloads will appear here after the first GitHub Release asset is published.";
+      metaEl.textContent = "Installer pending on GitHub Releases.";
       linkEl.href = manifest.releaseNotesUrl || "https://github.com/frizas/shinobi-online/releases";
       linkEl.textContent = "Open releases";
       linkEl.classList.add("is-disabled");
@@ -45,15 +50,15 @@ async function loadLatestManifest() {
     }
   } catch (error) {
     versionEl.textContent = "Unavailable";
-    channelEl.textContent = "Unknown";
     installerEl.textContent = "Unknown";
-    copyEl.textContent = "The latest manifest could not be loaded.";
+    sizeEl.textContent = "Unknown";
+    copyEl.textContent = "The latest release could not be loaded.";
     metaEl.textContent = error.message;
-    renderCompatibility(compatibilityEl, null);
+    renderCompatibilitySummary(compatibilityEl, null);
   }
 }
 
-function renderCompatibility(element, compatibility) {
+function renderCompatibilitySummary(element, compatibility) {
   if (!element) {
     return;
   }
@@ -65,17 +70,13 @@ function renderCompatibility(element, compatibility) {
     prerequisiteMode: "detect-and-guide"
   };
 
-  element.innerHTML = "";
-  [
-    ["OS", requirements.os],
-    ["Architecture", requirements.architecture],
-    ["Graphics", requirements.graphics],
-    ["Prerequisites", formatPrerequisiteMode(requirements.prerequisiteMode)]
-  ].forEach(([label, value]) => {
-    const item = document.createElement("li");
-    item.textContent = `${label}: ${value}`;
-    element.appendChild(item);
-  });
+  element.textContent = `${formatOs(requirements.os)} ${requirements.architecture}, OpenGL`;
+  element.title = [
+    requirements.os,
+    requirements.architecture,
+    requirements.graphics,
+    formatPrerequisiteMode(requirements.prerequisiteMode)
+  ].join(" | ");
 }
 
 function formatPrerequisiteMode(mode) {
@@ -99,9 +100,11 @@ async function loadServerManifest() {
 
     const manifest = await response.json();
     serverEl.textContent = formatServerStatus(manifest.status);
+    serverEl.dataset.status = manifest.status || "offline";
     serverEl.title = manifest.message || "";
   } catch {
     serverEl.textContent = "Unknown";
+    serverEl.dataset.status = "unknown";
   }
 }
 
@@ -126,6 +129,20 @@ function formatBytes(bytes) {
   }
 
   return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function formatOs(os) {
+  if (!os) {
+    return "Windows 10+";
+  }
+  return os.replace("Windows 10 or newer", "Windows 10+");
+}
+
+function shortHash(hash) {
+  if (!hash || hash.length < 16) {
+    return hash || "listed in latest.json";
+  }
+  return `${hash.slice(0, 8)}...${hash.slice(-8)}`;
 }
 
 loadLatestManifest();

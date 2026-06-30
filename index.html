@@ -5,71 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Download Shinobi Online and follow public release updates.">
     <title>Shinobi Online</title>
-    <link rel="preload" href="/assets/shinobi-online-hero.png" as="image">
+    <link rel="preload" href="/assets/shinobi-online-hero.webp" as="image" type="image/webp">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <main>
+    <main class="page-shell">
       <section class="hero" aria-labelledby="page-title">
-        <img class="hero__image" src="/assets/shinobi-online-hero.png" alt="">
-        <div class="hero__shade"></div>
+        <img class="hero__image" src="/assets/shinobi-online-hero.webp" width="1672" height="941" alt="" fetchpriority="high">
+        <div class="hero__veil"></div>
         <div class="hero__content">
-          <p class="eyebrow">Public distribution</p>
+          <p class="eyebrow">Public build</p>
           <h1 id="page-title">Shinobi Online</h1>
-          <p class="lede">The player-facing build channel for the Shinobi Online client.</p>
-          <div class="hero__actions">
-            <a class="button button--primary" href="#downloads-title">Download</a>
-            <a class="button button--secondary" href="/public/latest.json">Latest Manifest</a>
-          </div>
-        </div>
-      </section>
+          <p class="lede">Download the latest public build.</p>
 
-      <section class="status-band" aria-labelledby="status-title">
-        <div class="status-band__inner">
-          <div>
-            <p class="eyebrow">Current build</p>
-            <h2 id="status-title">Release status</h2>
-          </div>
-          <div class="status-grid" id="release-status">
-            <article class="status-card">
-              <span class="label">Version</span>
-              <strong id="release-version">Loading</strong>
-            </article>
-            <article class="status-card">
-              <span class="label">Channel</span>
-              <strong id="release-channel">Loading</strong>
-            </article>
-            <article class="status-card">
-              <span class="label">Installer</span>
-              <strong id="release-installer">Loading</strong>
-            </article>
-            <article class="status-card">
-              <span class="label">Leaf</span>
-              <strong id="server-status">Loading</strong>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="content-band" aria-labelledby="downloads-title">
-        <div class="content-band__inner">
-          <div class="section-heading">
-            <p class="eyebrow">Downloads</p>
-            <h2 id="downloads-title">Player package</h2>
-          </div>
-          <div class="download-row">
-            <div>
-              <p id="download-copy">Checking the latest public build manifest.</p>
-              <p class="meta" id="release-meta"></p>
-              <ul class="requirements" id="compatibility-requirements" aria-label="System requirements">
-                <li>OS: Loading</li>
-                <li>Architecture: Loading</li>
-                <li>Graphics: Loading</li>
-                <li>Prerequisites: Loading</li>
-              </ul>
+          <div class="download-panel" aria-label="Latest Shinobi Online download">
+            <div class="download-panel__head">
+              <div>
+                <span class="label">Current version</span>
+                <strong id="release-version">Loading</strong>
+              </div>
+              <p id="download-copy">Checking the latest release.</p>
             </div>
-            <a class="button button--download is-disabled" id="download-link" href="https://github.com/frizas/shinobi-online/releases" aria-disabled="true">Open releases</a>
+
+            <a class="button button--download is-disabled" id="download-link" href="https://github.com/frizas/shinobi-online/releases" aria-disabled="true">Checking download</a>
+
+            <dl class="release-grid">
+              <div>
+                <dt>Installer</dt>
+                <dd id="release-installer">Loading</dd>
+              </div>
+              <div>
+                <dt>Size</dt>
+                <dd id="release-size">Loading</dd>
+              </div>
+              <div>
+                <dt>Leaf</dt>
+                <dd id="server-status">Loading</dd>
+              </div>
+              <div>
+                <dt>Requires</dt>
+                <dd id="compatibility-summary">Windows 10+ x64, OpenGL</dd>
+              </div>
+            </dl>
+
+            <p class="release-meta" id="release-meta"></p>
           </div>
+
+          <footer class="site-footer" aria-label="Public links">
+            <a id="release-notes-link" href="https://github.com/frizas/shinobi-online/releases">Release notes</a>
+            <a href="https://github.com/frizas/shinobi-online">GitHub</a>
+            <a href="/public/latest.json">latest.json</a>
+            <a href="/public/server.json">server.json</a>
+          </footer>
         </div>
       </section>
     </main>
