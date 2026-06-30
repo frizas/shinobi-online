@@ -5,6 +5,7 @@ async function loadLatestManifest() {
   const copyEl = document.querySelector("#download-copy");
   const metaEl = document.querySelector("#release-meta");
   const linkEl = document.querySelector("#download-link");
+  const compatibilityEl = document.querySelector("#compatibility-requirements");
 
   try {
     const response = await fetch("/public/latest.json", { cache: "no-store" });
@@ -25,6 +26,7 @@ async function loadLatestManifest() {
     versionEl.textContent = manifest.version || "Unpublished";
     channelEl.textContent = manifest.channel || "production";
     installerEl.textContent = hasInstaller ? "Available" : "Pending";
+    renderCompatibility(compatibilityEl, manifest.compatibility);
 
     if (hasInstaller) {
       copyEl.textContent = `Shinobi Online ${manifest.version} is available.`;
@@ -47,7 +49,40 @@ async function loadLatestManifest() {
     installerEl.textContent = "Unknown";
     copyEl.textContent = "The latest manifest could not be loaded.";
     metaEl.textContent = error.message;
+    renderCompatibility(compatibilityEl, null);
   }
+}
+
+function renderCompatibility(element, compatibility) {
+  if (!element) {
+    return;
+  }
+
+  const requirements = compatibility || {
+    os: "Windows 10 or newer",
+    architecture: "x64",
+    graphics: "OpenGL-capable GPU driver",
+    prerequisiteMode: "detect-and-guide"
+  };
+
+  element.innerHTML = "";
+  [
+    ["OS", requirements.os],
+    ["Architecture", requirements.architecture],
+    ["Graphics", requirements.graphics],
+    ["Prerequisites", formatPrerequisiteMode(requirements.prerequisiteMode)]
+  ].forEach(([label, value]) => {
+    const item = document.createElement("li");
+    item.textContent = `${label}: ${value}`;
+    element.appendChild(item);
+  });
+}
+
+function formatPrerequisiteMode(mode) {
+  if (mode === "detect-and-guide") {
+    return "detected and explained by the launcher";
+  }
+  return mode || "detected by the launcher";
 }
 
 async function loadServerManifest() {

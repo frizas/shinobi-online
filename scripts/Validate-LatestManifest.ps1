@@ -39,6 +39,26 @@ if ($manifest.launcher.minimumVersion -notmatch '^\d+\.\d+\.\d+(-[A-Za-z0-9.-]+)
     throw 'launcher.minimumVersion must be semver-like.'
 }
 
+if (!$manifest.compatibility) {
+    throw 'compatibility metadata is required.'
+}
+
+if ($manifest.compatibility.os -ne 'Windows 10 or newer') {
+    throw 'compatibility.os must be "Windows 10 or newer".'
+}
+
+if ($manifest.compatibility.architecture -ne 'x64') {
+    throw 'compatibility.architecture must be "x64".'
+}
+
+if ($manifest.compatibility.graphics -ne 'OpenGL-capable GPU driver') {
+    throw 'compatibility.graphics must be "OpenGL-capable GPU driver".'
+}
+
+if ($manifest.compatibility.prerequisiteMode -ne 'detect-and-guide') {
+    throw 'compatibility.prerequisiteMode must be "detect-and-guide".'
+}
+
 function Assert-ReleaseArtifact {
     param(
         [object] $Artifact,

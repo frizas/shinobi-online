@@ -212,6 +212,24 @@ h2 {
   font-size: 0.88rem;
 }
 
+.requirements {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  max-width: 720px;
+  margin: 16px 0 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  list-style: none;
+}
+
+.requirements li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 900px) {
   .hero {
     min-height: 82vh;
@@ -224,7 +242,8 @@ h2 {
   }
 
   .status-band__inner,
-  .status-grid {
+  .status-grid,
+  .requirements {
     grid-template-columns: 1fr;
   }
 }

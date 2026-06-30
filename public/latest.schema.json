@@ -13,6 +13,7 @@
     "installer",
     "runtimePackage",
     "launcher",
+    "compatibility",
     "releaseNotesUrl",
     "message"
   ],
@@ -67,6 +68,25 @@
         "minimumVersion": {
           "type": "string",
           "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "compatibility": {
+      "type": "object",
+      "required": ["os", "architecture", "graphics", "prerequisiteMode"],
+      "properties": {
+        "os": {
+          "const": "Windows 10 or newer"
+        },
+        "architecture": {
+          "const": "x64"
+        },
+        "graphics": {
+          "const": "OpenGL-capable GPU driver"
+        },
+        "prerequisiteMode": {
+          "const": "detect-and-guide"
         }
       },
       "additionalProperties": false

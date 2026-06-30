@@ -11,6 +11,12 @@
     "currentVersion": "0.1.0",
     "minimumVersion": "0.1.0"
   },
+  "compatibility": {
+    "os": "Windows 10 or newer",
+    "architecture": "x64",
+    "graphics": "OpenGL-capable GPU driver",
+    "prerequisiteMode": "detect-and-guide"
+  },
   "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases",
   "message": "The first public Shinobi Online installer has not been published yet."
 }

@@ -36,6 +36,12 @@ The manifest should be updated after a release asset is published:
     "sha256": "<64 lowercase hex characters>",
     "runtimeManifestSha256": "<64 lowercase hex characters>",
     "sizeBytes": 12345678
+  },
+  "compatibility": {
+    "os": "Windows 10 or newer",
+    "architecture": "x64",
+    "graphics": "OpenGL-capable GPU driver",
+    "prerequisiteMode": "detect-and-guide"
   }
 }
 ```
