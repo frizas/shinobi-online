@@ -11,6 +11,7 @@ Live distribution site: https://shinobionline.vercel.app
 - Website entry point: `index.html`
 - Vercel configuration: `vercel.json`
 - Latest release manifest: `public/latest.json`
+- Leaf server manifest: `public/server.json`
 - Manifest schema: `public/latest.schema.json`
 - Public release notes: `releases/`
 
@@ -22,15 +23,28 @@ The manifest should be updated after a release asset is published:
 
 ```json
 {
+  "schemaVersion": 2,
   "version": "0.1.0",
-  "installerUrl": "https://github.com/frizas/shinobi-online/releases/download/v0.1.0/ShinobiOnlineSetup-0.1.0.exe",
-  "sha256": "<64 lowercase hex characters>",
-  "sizeBytes": 12345678
+  "status": "available",
+  "installer": {
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.0/ShinobiOnlineSetup-0.1.0.exe",
+    "sha256": "<64 lowercase hex characters>",
+    "sizeBytes": 12345678
+  },
+  "runtimePackage": {
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.0/ShinobiOnlineRuntime-0.1.0.zip",
+    "sha256": "<64 lowercase hex characters>",
+    "runtimeManifestSha256": "<64 lowercase hex characters>",
+    "sizeBytes": 12345678
+  }
 }
 ```
+
+`public/server.json` is updated by the private operator repo when Leaf starts or stops.
 
 ## Validation
 
 ```powershell
 pwsh -ExecutionPolicy Bypass -File .\scripts\Validate-LatestManifest.ps1
+pwsh -ExecutionPolicy Bypass -File .\scripts\Validate-ServerManifest.ps1
 ```

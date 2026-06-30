@@ -1,15 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "game": "Shinobi Online",
   "channel": "production",
   "version": "0.0.0",
   "status": "pending-release",
-  "installerFileName": null,
-  "installerUrl": null,
-  "sha256": null,
-  "sizeBytes": 0,
-  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases",
-  "minimumLauncherVersion": "0.1.0",
   "publishedAt": null,
+  "installer": null,
+  "runtimePackage": null,
+  "launcher": {
+    "currentVersion": "0.1.0",
+    "minimumVersion": "0.1.0"
+  },
+  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases",
   "message": "The first public Shinobi Online installer has not been published yet."
 }

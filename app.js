@@ -13,16 +13,23 @@ async function loadLatestManifest() {
     }
 
     const manifest = await response.json();
-    const hasInstaller = Boolean(manifest.installerUrl && manifest.sha256 && manifest.sizeBytes > 0);
+    const installer = manifest.installer;
+    const hasInstaller = Boolean(
+      manifest.status === "available" &&
+      installer &&
+      installer.url &&
+      installer.sha256 &&
+      installer.sizeBytes > 0
+    );
 
     versionEl.textContent = manifest.version || "Unpublished";
     channelEl.textContent = manifest.channel || "production";
     installerEl.textContent = hasInstaller ? "Available" : "Pending";
 
     if (hasInstaller) {
-      copyEl.textContent = "The latest Shinobi Online installer is available from GitHub Releases.";
-      metaEl.textContent = `SHA-256 ${manifest.sha256} | ${formatBytes(manifest.sizeBytes)}`;
-      linkEl.href = manifest.installerUrl;
+      copyEl.textContent = `Shinobi Online ${manifest.version} is available.`;
+      metaEl.textContent = `SHA-256 ${installer.sha256} | ${formatBytes(installer.sizeBytes)}`;
+      linkEl.href = installer.url;
       linkEl.textContent = "Download installer";
       linkEl.classList.remove("is-disabled");
       linkEl.removeAttribute("aria-disabled");
@@ -43,6 +50,36 @@ async function loadLatestManifest() {
   }
 }
 
+async function loadServerManifest() {
+  const serverEl = document.querySelector("#server-status");
+  if (!serverEl) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/public/server.json", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Server manifest request failed: ${response.status}`);
+    }
+
+    const manifest = await response.json();
+    serverEl.textContent = formatServerStatus(manifest.status);
+    serverEl.title = manifest.message || "";
+  } catch {
+    serverEl.textContent = "Unknown";
+  }
+}
+
+function formatServerStatus(status) {
+  if (status === "online") {
+    return "Online";
+  }
+  if (status === "maintenance") {
+    return "Maintenance";
+  }
+  return "Offline";
+}
+
 function formatBytes(bytes) {
   const units = ["B", "KB", "MB", "GB"];
   let value = bytes;
@@ -57,3 +94,4 @@ function formatBytes(bytes) {
 }
 
 loadLatestManifest();
+loadServerManifest();

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shinobi-online.example/public/latest.schema.json",
+  "$id": "https://shinobionline.vercel.app/public/latest.schema.json",
   "title": "Shinobi Online latest release manifest",
   "type": "object",
   "required": [
@@ -9,16 +9,16 @@
     "channel",
     "version",
     "status",
-    "installerUrl",
-    "sha256",
-    "sizeBytes",
+    "publishedAt",
+    "installer",
+    "runtimePackage",
+    "launcher",
     "releaseNotesUrl",
-    "minimumLauncherVersion",
-    "publishedAt"
+    "message"
   ],
   "properties": {
     "schemaVersion": {
-      "const": 1
+      "const": 2
     },
     "game": {
       "const": "Shinobi Online"
@@ -33,28 +33,46 @@
     "status": {
       "enum": ["pending-release", "available", "withdrawn"]
     },
-    "installerFileName": {
+    "publishedAt": {
       "type": ["string", "null"]
     },
-    "installerUrl": {
-      "type": ["string", "null"]
+    "installer": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/artifact"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "sha256": {
-      "type": ["string", "null"],
-      "pattern": "^[a-f0-9]{64}$"
+    "runtimePackage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/runtimePackage"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "sizeBytes": {
-      "type": "integer",
-      "minimum": 0
+    "launcher": {
+      "type": "object",
+      "required": ["currentVersion", "minimumVersion"],
+      "properties": {
+        "currentVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+        },
+        "minimumVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+        }
+      },
+      "additionalProperties": false
     },
     "releaseNotesUrl": {
       "type": "string"
-    },
-    "minimumLauncherVersion": {
-      "type": "string"
-    },
-    "publishedAt": {
-      "type": ["string", "null"]
     },
     "message": {
       "type": "string"
@@ -71,27 +89,68 @@
       },
       "then": {
         "properties": {
-          "installerFileName": {
-            "type": "string"
-          },
-          "installerUrl": {
-            "type": "string",
-            "pattern": "^https://github\\.com/frizas/shinobi-online/releases/download/"
-          },
-          "sha256": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "sizeBytes": {
-            "type": "integer",
-            "minimum": 1
-          },
           "publishedAt": {
             "type": "string"
+          },
+          "installer": {
+            "$ref": "#/$defs/artifact"
+          },
+          "runtimePackage": {
+            "$ref": "#/$defs/runtimePackage"
           }
         }
       }
     }
   ],
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": ["fileName", "url", "sha256", "sizeBytes"],
+      "properties": {
+        "fileName": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://github\\.com/frizas/shinobi-online/releases/download/"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtimePackage": {
+      "type": "object",
+      "required": ["fileName", "url", "sha256", "sizeBytes", "runtimeManifestSha256"],
+      "properties": {
+        "fileName": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://github\\.com/frizas/shinobi-online/releases/download/"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "runtimeManifestSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
   "additionalProperties": false
 }
