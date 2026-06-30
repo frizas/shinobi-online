@@ -70,8 +70,8 @@ a {
 .hero__content {
   position: relative;
   display: flex;
-  flex: 0 1 560px;
-  width: min(560px, 100%);
+  flex: 0 1 680px;
+  width: min(680px, 100%);
   max-width: 100%;
   min-width: 0;
   min-height: calc(100svh - 92px);
@@ -87,7 +87,6 @@ a {
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 h1,
@@ -97,10 +96,11 @@ p {
 
 h1 {
   margin-bottom: 14px;
-  font-size: 5.8rem;
-  line-height: 0.92;
+  font-size: 5.25rem;
+  line-height: 0.96;
   letter-spacing: 0;
-  text-wrap: balance;
+  white-space: nowrap;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.56), 0 2px 4px rgba(0, 0, 0, 0.42);
 }
 
 .lede {
@@ -163,9 +163,17 @@ h1 {
   margin-bottom: 14px;
 }
 
+.download-panel__version {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 12px;
+  white-space: nowrap;
+}
+
 .download-panel__head strong {
-  display: block;
-  margin-top: 4px;
+  display: inline-block;
+  margin-top: 0;
   font-size: 1.45rem;
   line-height: 1;
 }
@@ -177,6 +185,7 @@ h1 {
   font-size: 0.92rem;
   line-height: 1.4;
   text-align: right;
+  white-space: nowrap;
 }
 
 .download-panel .button {
@@ -286,13 +295,23 @@ h1 {
   }
 }
 
+@media (max-width: 640px) {
+  h1 {
+    font-size: 3.35rem;
+  }
+
+  .download-panel__head {
+    gap: 12px;
+  }
+}
+
 @media (max-width: 520px) {
   .hero {
     padding: 34px 20px 22px;
   }
 
   h1 {
-    font-size: 2.85rem;
+    font-size: 2.75rem;
   }
 
   .lede {
@@ -312,6 +331,7 @@ h1 {
     max-width: none;
     margin-top: 10px;
     text-align: left;
+    white-space: normal;
   }
 
   .release-grid {
@@ -333,5 +353,19 @@ h1 {
 
   .site-footer {
     gap: 10px 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  h1 {
+    font-size: 2.32rem;
+  }
+
+  .download-panel__version {
+    gap: 9px;
+  }
+
+  .download-panel__head strong {
+    font-size: 1.25rem;
   }
 }

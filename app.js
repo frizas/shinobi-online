@@ -34,15 +34,17 @@ async function loadLatestManifest() {
     }
 
     if (hasInstaller) {
-      copyEl.textContent = manifest.message || `Shinobi Online ${manifest.version} is available.`;
-      metaEl.textContent = `SHA-256 ${shortHash(installer.sha256)}`;
+      copyEl.textContent = formatReleaseDateCopy(manifest.publishedAt);
+      metaEl.textContent = "";
+      metaEl.hidden = true;
       linkEl.href = installer.url;
       linkEl.textContent = "Download for Windows";
       linkEl.classList.remove("is-disabled");
       linkEl.removeAttribute("aria-disabled");
     } else {
       copyEl.textContent = manifest.message || "The first public installer has not been published yet.";
-      metaEl.textContent = "Installer pending on GitHub Releases.";
+      metaEl.textContent = "";
+      metaEl.hidden = true;
       linkEl.href = manifest.releaseNotesUrl || "https://github.com/frizas/shinobi-online/releases";
       linkEl.textContent = "Open releases";
       linkEl.classList.add("is-disabled");
@@ -53,9 +55,31 @@ async function loadLatestManifest() {
     installerEl.textContent = "Unknown";
     sizeEl.textContent = "Unknown";
     copyEl.textContent = "The latest release could not be loaded.";
-    metaEl.textContent = error.message;
+    metaEl.textContent = "";
+    metaEl.hidden = true;
     renderCompatibilitySummary(compatibilityEl, null);
   }
+}
+
+function formatReleaseDateCopy(publishedAt) {
+  const fallback = "Latest release date is listed in the release notes.";
+  if (!publishedAt) {
+    return fallback;
+  }
+
+  const date = new Date(publishedAt);
+  if (Number.isNaN(date.getTime())) {
+    return fallback;
+  }
+
+  const formattedDate = new Intl.DateTimeFormat("en", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(date);
+
+  return `Latest release: ${formattedDate}`;
 }
 
 function renderCompatibilitySummary(element, compatibility) {
@@ -136,13 +160,6 @@ function formatOs(os) {
     return "Windows 10+";
   }
   return os.replace("Windows 10 or newer", "Windows 10+");
-}
-
-function shortHash(hash) {
-  if (!hash || hash.length < 16) {
-    return hash || "listed in latest.json";
-  }
-  return `${hash.slice(0, 8)}...${hash.slice(-8)}`;
 }
 
 loadLatestManifest();
