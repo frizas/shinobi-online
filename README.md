@@ -4,6 +4,8 @@ Public distribution repository for Shinobi Online.
 
 This repo contains the player-facing website, public release notes, and the latest-version manifest used by the launcher/update flow. Server source, operator tooling, live databases, and private authority logic live in the private `frizas/shinobi-online-servers` repository.
 
+Live distribution site: https://shinobi-online-frizas-frizas-projects-a9f36227.vercel.app
+
 ## Public Artifacts
 
 - Website entry point: `index.html`
