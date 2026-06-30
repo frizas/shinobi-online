@@ -2,11 +2,22 @@
   "schemaVersion": 2,
   "game": "Shinobi Online",
   "channel": "production",
-  "version": "0.0.0",
-  "status": "pending-release",
-  "publishedAt": null,
-  "installer": null,
-  "runtimePackage": null,
+  "version": "0.1.0",
+  "status": "available",
+  "publishedAt": "2026-06-30T07:36:07.7758879Z",
+  "installer": {
+    "fileName": "ShinobiOnlineSetup-0.1.0.exe",
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.0/ShinobiOnlineSetup-0.1.0.exe",
+    "sha256": "c2f79f25244d8f84db645042b45bf2c65e7631cf7a1675f0b7fda4e0d0624832",
+    "sizeBytes": 61631371
+  },
+  "runtimePackage": {
+    "fileName": "ShinobiOnlineRuntime-0.1.0.zip",
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.0/ShinobiOnlineRuntime-0.1.0.zip",
+    "sha256": "433a3c6d9f5a3e171dca14075dce57aa7e752a43fa6cef7ce037902fb0b93c3b",
+    "sizeBytes": 74637552,
+    "runtimeManifestSha256": "85ea15762805f5e4d05c30dab7e8e3e2e3451a5b276720b265ef9cdaaed3fc4e"
+  },
   "launcher": {
     "currentVersion": "0.1.0",
     "minimumVersion": "0.1.0"
@@ -17,6 +28,6 @@
     "graphics": "OpenGL-capable GPU driver",
     "prerequisiteMode": "detect-and-guide"
   },
-  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases",
-  "message": "The first public Shinobi Online installer has not been published yet."
+  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases/tag/v0.1.0",
+  "message": "Shinobi Online 0.1.0 is available."
 }
