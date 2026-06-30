@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "serverName": "Leaf",
-  "status": "offline",
+  "status": "online",
   "mode": "pinggy",
-  "loginHost": "",
-  "loginPort": 0,
-  "gameHost": "",
-  "gamePort": 0,
+  "loginHost": "172.233.17.91",
+  "loginPort": 45861,
+  "gameHost": "172.233.17.91",
+  "gamePort": 45517,
   "protocol": 854,
-  "updatedAt": "2026-06-30T21:01:34.8174958Z",
-  "endpointRevision": 19,
-  "message": "Leaf is offline."
+  "updatedAt": "2026-06-30T21:02:53.8931672Z",
+  "endpointRevision": 20,
+  "message": "Leaf is online."
 }
