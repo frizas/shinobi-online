@@ -1,7 +1,7 @@
 {
   "name": "Shinobi Online",
   "short_name": "Shinobi Online",
-  "description": "Shinobi Online - a Naruto based online game. Download now!",
+  "description": "Shinobi Online - a naruto based online game. Download now!",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

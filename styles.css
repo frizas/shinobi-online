@@ -10,6 +10,7 @@
   --amber-hot: #f0bd62;
   --leaf: #80ad83;
   --black: #05080a;
+  --hero-text-indent: clamp(24px, 3.4vw, 46px);
 }
 
 * {
@@ -82,7 +83,7 @@ a {
 }
 
 .eyebrow {
-  margin: 0 0 10px;
+  margin: 0 0 10px var(--hero-text-indent);
   color: var(--amber);
   font-size: 0.75rem;
   font-weight: 800;
@@ -253,7 +254,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  margin-left: 24px;
+  margin-left: var(--hero-text-indent);
   margin-top: auto;
   padding-top: 26px;
   color: rgba(247, 241, 223, 0.66);
@@ -357,7 +358,7 @@ h1 {
 
   .site-footer {
     gap: 10px 12px;
-    margin-left: 16px;
+    margin-left: var(--hero-text-indent);
   }
 }
 
