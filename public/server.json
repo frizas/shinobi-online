@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "serverName": "Leaf",
-  "status": "maintenance",
+  "status": "offline",
   "mode": "pinggy",
   "loginHost": "",
   "loginPort": 0,
   "gameHost": "",
   "gamePort": 0,
   "protocol": 854,
-  "updatedAt": "2026-07-01T04:41:56.2794546Z",
-  "endpointRevision": 26,
-  "message": "Leaf is refreshing public tunnels. Please reopen the Shinobi Online Launcher or try again in about a minute."
+  "updatedAt": "2026-07-01T04:52:35.8479014Z",
+  "endpointRevision": 27,
+  "message": "Leaf is offline."
 }
