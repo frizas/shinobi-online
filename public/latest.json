@@ -2,48 +2,48 @@
   "schemaVersion": 2,
   "game": "Shinobi Online",
   "channel": "production",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "status": "available",
-  "publishedAt": "2026-07-01T06:55:12.7796099Z",
+  "publishedAt": "2026-07-01T07:14:01.9110246Z",
   "installer": {
-    "fileName": "ShinobiOnlineSetup-0.1.7.exe",
-    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.7/ShinobiOnlineSetup-0.1.7.exe",
-    "sha256": "d32c25df260848f626819cf4c3e4d1528922da95ef917ad3f7d908fc3f2be97d",
-    "sizeBytes": 64130307
+    "fileName": "ShinobiOnlineSetup-0.1.8.exe",
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.8/ShinobiOnlineSetup-0.1.8.exe",
+    "sha256": "1056735743108f745994532e6b2c663b8a0d19d78aaf7d3c35e35f480bfe64b4",
+    "sizeBytes": 64130481
   },
   "runtimePackage": {
-    "fileName": "ShinobiOnlineRuntime-0.1.7.zip",
-    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.7/ShinobiOnlineRuntime-0.1.7.zip",
-    "sha256": "f321a4273958316598bef434e4236945bd348f124d3f428da845bd01d9a3e9df",
-    "sizeBytes": 76961194,
-    "runtimeManifestSha256": "582156c32a86f1b472143ca73fec852c538f8c8beb26fa603c2c476514c64e7e"
+    "fileName": "ShinobiOnlineRuntime-0.1.8.zip",
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.8/ShinobiOnlineRuntime-0.1.8.zip",
+    "sha256": "c09abaa593464e21490ef36b85bb6c39f48ed4465703cec8a0a90e006dfdef7c",
+    "sizeBytes": 76961159,
+    "runtimeManifestSha256": "f61f5b59d3380086d370ccf5fb88dcc65d1611bd9e42c182448be4ea40b99179"
   },
   "launcher": {
-    "currentVersion": "0.1.1",
-    "minimumVersion": "0.1.1"
+    "currentVersion": "0.1.2",
+    "minimumVersion": "0.1.2"
   },
   "clientBuild": {
     "current": {
-      "version": "0.1.7",
-      "token": "582156c32a86f1b472143ca73fec852c538f8c8beb26fa603c2c476514c64e7e",
+      "version": "0.1.8",
+      "token": "f61f5b59d3380086d370ccf5fb88dcc65d1611bd9e42c182448be4ea40b99179",
       "tokenKind": "runtimeManifestSha256",
-      "publishedAt": "2026-07-01T06:55:12.7796099Z"
+      "publishedAt": "2026-07-01T07:14:01.9110246Z"
     },
     "accepted": [
+      {
+        "version": "0.1.8",
+        "token": "f61f5b59d3380086d370ccf5fb88dcc65d1611bd9e42c182448be4ea40b99179",
+        "tokenKind": "runtimeManifestSha256",
+        "publishedAt": "2026-07-01T07:14:01.9110246Z"
+      },
       {
         "version": "0.1.7",
         "token": "582156c32a86f1b472143ca73fec852c538f8c8beb26fa603c2c476514c64e7e",
         "tokenKind": "runtimeManifestSha256",
-        "publishedAt": "2026-07-01T06:55:12.7796099Z"
-      },
-      {
-        "version": "0.1.6",
-        "token": "80d679b90d7b12ef73cab57710de9aa2df601a3d3c1b2b537106bd578d5cffb5",
-        "tokenKind": "runtimeManifestSha256",
-        "publishedAt": "07/01/2026 05:55:57"
+        "publishedAt": "07/01/2026 06:55:12"
       }
     ],
-    "minimumAcceptedVersion": "0.1.6",
+    "minimumAcceptedVersion": "0.1.7",
     "updateMode": "launcher"
   },
   "compatibility": {
@@ -52,6 +52,6 @@
     "graphics": "OpenGL-capable GPU driver",
     "prerequisiteMode": "detect-and-guide"
   },
-  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases/tag/v0.1.7",
-  "message": "Shinobi Online 0.1.7 is available."
+  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases/tag/v0.1.8",
+  "message": "Shinobi Online 0.1.8 is available."
 }
