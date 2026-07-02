@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "serverName": "Leaf",
-  "status": "maintenance",
+  "status": "online",
   "mode": "pinggy",
-  "loginHost": "",
-  "loginPort": 0,
-  "gameHost": "",
-  "gamePort": 0,
+  "loginHost": "172.233.17.91",
+  "loginPort": 37557,
+  "gameHost": "172.233.17.91",
+  "gamePort": 34879,
   "protocol": 854,
-  "updatedAt": "2026-07-02T14:31:38.9655570Z",
-  "endpointRevision": 116,
-  "message": "Server offline. Try again later."
+  "updatedAt": "2026-07-02T14:32:28.8090611Z",
+  "endpointRevision": 117,
+  "message": "Leaf is online. If you were disconnected, reopen the Shinobi Online Launcher and log in again."
 }
