@@ -1,57 +1,57 @@
 {
-    "schemaVersion":  2,
-    "game":  "Shinobi Online",
-    "channel":  "production",
-    "version":  "0.1.24",
-    "status":  "available",
-    "publishedAt":  "2026-07-02T01:15:34.6712966Z",
-    "installer":  {
-                      "fileName":  "ShinobiOnlineSetup-0.1.24.exe",
-                      "url":  "https://github.com/frizas/shinobi-online/releases/download/v0.1.24/ShinobiOnlineSetup-0.1.24.exe",
-                      "sha256":  "cd67bf48da0c7178d48e9cac90916ba9fd6be78f32425c42d32bd56d88bb1789",
-                      "sizeBytes":  64083715
-                  },
-    "runtimePackage":  {
-                           "fileName":  "ShinobiOnlineRuntime-0.1.24.zip",
-                           "url":  "https://github.com/frizas/shinobi-online/releases/download/v0.1.24/ShinobiOnlineRuntime-0.1.24.zip",
-                           "sha256":  "f232cb7bf15692d7faeca18bbb45732caca327dfb32415274ab8f970274980e5",
-                           "sizeBytes":  74386969,
-                           "runtimeManifestSha256":  "40e2e40b6f733245656de7bf11ff5fb5a5f14818ad76d4db2d85f9acdd64f8f9"
-                       },
-    "launcher":  {
-                     "currentVersion":  "0.1.2",
-                     "minimumVersion":  "0.1.2"
-                 },
-    "clientBuild":  {
-                        "current":  {
-                                        "version":  "0.1.24",
-                                        "token":  "40e2e40b6f733245656de7bf11ff5fb5a5f14818ad76d4db2d85f9acdd64f8f9",
-                                        "tokenKind":  "runtimeManifestSha256",
-                                        "publishedAt":  "2026-07-02T01:15:34.6712966Z"
-                                    },
-                        "accepted":  [
-                                         {
-                                             "version":  "0.1.24",
-                                             "token":  "40e2e40b6f733245656de7bf11ff5fb5a5f14818ad76d4db2d85f9acdd64f8f9",
-                                             "tokenKind":  "runtimeManifestSha256",
-                                             "publishedAt":  "2026-07-02T01:15:34.6712966Z"
-                                         },
-                                         {
-                                             "version":  "0.1.23",
-                                             "token":  "94ad4225da9842497505fd8d4671ace0c3813ffebef3469482db1b16649b5b9f",
-                                             "tokenKind":  "runtimeManifestSha256",
-                                             "publishedAt":  "2026-07-01T15:35:30.3207950Z"
-                                         }
-                                     ],
-                        "minimumAcceptedVersion":  "0.1.23",
-                        "updateMode":  "launcher"
-                    },
-    "compatibility":  {
-                          "os":  "Windows 10 or newer",
-                          "architecture":  "x64",
-                          "graphics":  "OpenGL-capable GPU driver",
-                          "prerequisiteMode":  "detect-and-guide"
-                      },
-    "releaseNotesUrl":  "https://github.com/frizas/shinobi-online/releases/tag/v0.1.24",
-    "message":  "Shinobi Online 0.1.24 is available."
+  "schemaVersion": 2,
+  "game": "Shinobi Online",
+  "channel": "production",
+  "version": "0.1.25",
+  "status": "available",
+  "publishedAt": "2026-07-02T07:25:22.4756276Z",
+  "installer": {
+    "fileName": "ShinobiOnlineSetup-0.1.25.exe",
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.25/ShinobiOnlineSetup-0.1.25.exe",
+    "sha256": "83bbf1f9caddbe14d82f9c49a7bc53dd7d0bbb1530762711f57b2cb4275b21f2",
+    "sizeBytes": 64081097
+  },
+  "runtimePackage": {
+    "fileName": "ShinobiOnlineRuntime-0.1.25.zip",
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.25/ShinobiOnlineRuntime-0.1.25.zip",
+    "sha256": "8f636593b8f9dcd1418e73f6a4802d72bbc6ac44acdbe5600669e0c6b3209a62",
+    "sizeBytes": 76758925,
+    "runtimeManifestSha256": "a88b4ec7bdeb899fcf4c7513e6d6037c452c099a3675b9704a70491bbe4d69a4"
+  },
+  "launcher": {
+    "currentVersion": "0.1.2",
+    "minimumVersion": "0.1.2"
+  },
+  "clientBuild": {
+    "current": {
+      "version": "0.1.25",
+      "token": "a88b4ec7bdeb899fcf4c7513e6d6037c452c099a3675b9704a70491bbe4d69a4",
+      "tokenKind": "runtimeManifestSha256",
+      "publishedAt": "2026-07-02T07:25:22.4756276Z"
+    },
+    "accepted": [
+      {
+        "version": "0.1.25",
+        "token": "a88b4ec7bdeb899fcf4c7513e6d6037c452c099a3675b9704a70491bbe4d69a4",
+        "tokenKind": "runtimeManifestSha256",
+        "publishedAt": "2026-07-02T07:25:22.4756276Z"
+      },
+      {
+        "version": "0.1.24",
+        "token": "40e2e40b6f733245656de7bf11ff5fb5a5f14818ad76d4db2d85f9acdd64f8f9",
+        "tokenKind": "runtimeManifestSha256",
+        "publishedAt": "07/02/2026 01:15:34"
+      }
+    ],
+    "minimumAcceptedVersion": "0.1.24",
+    "updateMode": "launcher"
+  },
+  "compatibility": {
+    "os": "Windows 10 or newer",
+    "architecture": "x64",
+    "graphics": "OpenGL-capable GPU driver",
+    "prerequisiteMode": "detect-and-guide"
+  },
+  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases/tag/v0.1.25",
+  "message": "Shinobi Online 0.1.25 is available."
 }
