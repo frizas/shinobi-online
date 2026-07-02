@@ -86,6 +86,33 @@ function Assert-ReleaseArtifact {
     }
 }
 
+function Assert-ClientBuildEntry {
+    param(
+        [object] $Entry,
+        [string] $Name
+    )
+
+    if (!$Entry) {
+        throw "$Name is required."
+    }
+
+    if ($Entry.version -notmatch '^\d+\.\d+\.\d+(-[A-Za-z0-9.-]+)?$') {
+        throw "$Name.version must be semver-like."
+    }
+
+    if ($Entry.token -notmatch '^[a-f0-9]{64}$') {
+        throw "$Name.token must be a lowercase 64-character SHA-256."
+    }
+
+    if ($Entry.tokenKind -ne 'runtimeManifestSha256') {
+        throw "$Name.tokenKind must be runtimeManifestSha256."
+    }
+
+    if ([string]::IsNullOrWhiteSpace($Entry.publishedAt)) {
+        throw "$Name.publishedAt is required."
+    }
+}
+
 if ($manifest.status -eq 'available') {
     if ([string]::IsNullOrWhiteSpace($manifest.publishedAt)) {
         throw 'available manifests require publishedAt.'
@@ -96,6 +123,29 @@ if ($manifest.status -eq 'available') {
 
     if ($manifest.runtimePackage.runtimeManifestSha256 -notmatch '^[a-f0-9]{64}$') {
         throw 'runtimePackage.runtimeManifestSha256 must be a lowercase 64-character SHA-256.'
+    }
+
+    if (!$manifest.clientBuild) {
+        throw 'available manifests require clientBuild metadata.'
+    }
+
+    if ($manifest.clientBuild.updateMode -ne 'launcher') {
+        throw 'clientBuild.updateMode must be launcher.'
+    }
+
+    if ($manifest.clientBuild.minimumAcceptedVersion -notmatch '^\d+\.\d+\.\d+(-[A-Za-z0-9.-]+)?$') {
+        throw 'clientBuild.minimumAcceptedVersion must be semver-like.'
+    }
+
+    Assert-ClientBuildEntry -Entry $manifest.clientBuild.current -Name 'clientBuild.current'
+
+    $acceptedBuilds = @($manifest.clientBuild.accepted)
+    if ($acceptedBuilds.Count -lt 1) {
+        throw 'clientBuild.accepted must contain at least one build.'
+    }
+
+    for ($i = 0; $i -lt $acceptedBuilds.Count; $i++) {
+        Assert-ClientBuildEntry -Entry $acceptedBuilds[$i] -Name "clientBuild.accepted[$i]"
     }
 }
 

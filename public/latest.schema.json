@@ -72,6 +72,9 @@
       },
       "additionalProperties": false
     },
+    "clientBuild": {
+      "$ref": "#/$defs/clientBuild"
+    },
     "compatibility": {
       "type": "object",
       "required": ["os", "architecture", "graphics", "prerequisiteMode"],
@@ -108,6 +111,7 @@
         }
       },
       "then": {
+        "required": ["publishedAt", "installer", "runtimePackage", "clientBuild"],
         "properties": {
           "publishedAt": {
             "type": "string"
@@ -117,6 +121,9 @@
           },
           "runtimePackage": {
             "$ref": "#/$defs/runtimePackage"
+          },
+          "clientBuild": {
+            "$ref": "#/$defs/clientBuild"
           }
         }
       }
@@ -167,6 +174,51 @@
         "runtimeManifestSha256": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "clientBuild": {
+      "type": "object",
+      "required": ["current", "accepted", "minimumAcceptedVersion", "updateMode"],
+      "properties": {
+        "current": {
+          "$ref": "#/$defs/clientBuildEntry"
+        },
+        "accepted": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/clientBuildEntry"
+          }
+        },
+        "minimumAcceptedVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+        },
+        "updateMode": {
+          "const": "launcher"
+        }
+      },
+      "additionalProperties": false
+    },
+    "clientBuildEntry": {
+      "type": "object",
+      "required": ["version", "token", "tokenKind", "publishedAt"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+        },
+        "token": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "tokenKind": {
+          "const": "runtimeManifestSha256"
+        },
+        "publishedAt": {
+          "type": "string"
         }
       },
       "additionalProperties": false
