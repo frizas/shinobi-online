@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "serverName": "Leaf",
-  "status": "offline",
+  "status": "maintenance",
   "mode": "pinggy",
   "loginHost": "",
   "loginPort": 0,
   "gameHost": "",
   "gamePort": 0,
   "protocol": 854,
-  "updatedAt": "2026-07-03T15:04:48.0802176Z",
-  "endpointRevision": 153,
+  "updatedAt": "2026-07-03T15:04:51.2685255Z",
+  "endpointRevision": 154,
   "message": "Server offline. Try again later."
 }
