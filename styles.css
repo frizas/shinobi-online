@@ -189,9 +189,15 @@ h1 {
   white-space: nowrap;
 }
 
-.download-panel .button {
-  width: 100%;
+.download-actions {
+  display: grid;
+  gap: 10px;
   margin-bottom: 16px;
+}
+
+.download-panel .download-actions .button {
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .label,

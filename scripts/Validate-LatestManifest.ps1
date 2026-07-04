@@ -113,17 +113,26 @@ function Assert-ClientBuildEntry {
     }
 }
 
+function Assert-RuntimePackage {
+    param(
+        [object] $Package,
+        [string] $Name
+    )
+
+    Assert-ReleaseArtifact -Artifact $Package -Name $Name
+
+    if ($Package.runtimeManifestSha256 -notmatch '^[a-f0-9]{64}$') {
+        throw "$Name.runtimeManifestSha256 must be a lowercase 64-character SHA-256."
+    }
+}
+
 if ($manifest.status -eq 'available') {
     if ([string]::IsNullOrWhiteSpace($manifest.publishedAt)) {
         throw 'available manifests require publishedAt.'
     }
 
     Assert-ReleaseArtifact -Artifact $manifest.installer -Name 'installer'
-    Assert-ReleaseArtifact -Artifact $manifest.runtimePackage -Name 'runtimePackage'
-
-    if ($manifest.runtimePackage.runtimeManifestSha256 -notmatch '^[a-f0-9]{64}$') {
-        throw 'runtimePackage.runtimeManifestSha256 must be a lowercase 64-character SHA-256.'
-    }
+    Assert-RuntimePackage -Package $manifest.runtimePackage -Name 'runtimePackage'
 
     if (!$manifest.clientBuild) {
         throw 'available manifests require clientBuild metadata.'
@@ -146,6 +155,45 @@ if ($manifest.status -eq 'available') {
 
     for ($i = 0; $i -lt $acceptedBuilds.Count; $i++) {
         Assert-ClientBuildEntry -Entry $acceptedBuilds[$i] -Name "clientBuild.accepted[$i]"
+    }
+
+    if ($manifest.android) {
+        if ($manifest.android.versionName -notmatch '^\d+\.\d+\.\d+(-[A-Za-z0-9.-]+)?$') {
+            throw 'android.versionName must be semver-like.'
+        }
+
+        if ($manifest.android.versionCode -lt 1) {
+            throw 'android.versionCode must be greater than 0.'
+        }
+
+        if ($manifest.android.minimumVersionCode -lt 1) {
+            throw 'android.minimumVersionCode must be greater than 0.'
+        }
+
+        if ($manifest.android.minimumVersionCode -gt $manifest.android.versionCode) {
+            throw 'android.minimumVersionCode cannot be greater than android.versionCode.'
+        }
+
+        if ($manifest.android.packageName -notmatch '^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$') {
+            throw 'android.packageName must be a Java-style package name.'
+        }
+
+        if ($manifest.android.updateMode -ne 'website') {
+            throw 'android.updateMode must be website.'
+        }
+
+        if ([string]::IsNullOrWhiteSpace($manifest.android.downloadUrl)) {
+            throw 'android.downloadUrl is required.'
+        }
+
+        Assert-ReleaseArtifact -Artifact $manifest.android.apk -Name 'android.apk'
+        Assert-RuntimePackage -Package $manifest.android.runtimePackage -Name 'android.runtimePackage'
+
+        if ($manifest.android.acceptedRuntimePackages) {
+            foreach ($entry in @($manifest.android.acceptedRuntimePackages)) {
+                Assert-ClientBuildEntry -Entry $entry -Name 'android.acceptedRuntimePackages[]'
+            }
+        }
     }
 }
 

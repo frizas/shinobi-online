@@ -22,9 +22,13 @@ Vercel should host only the static website and small manifest files. Game server
 
 ## Player Launcher Contract
 
-The website download button reads `public/latest.json.installer.url`. The installed launcher reads:
+The website Windows download button reads `public/latest.json.installer.url`. When present, the Android download button reads `public/latest.json.android.apk.url`. The installed launcher reads:
 
 - `public/latest.json` for installer and runtime package versions.
 - `public/server.json` for the current Leaf endpoint.
 
 The launcher downloads full runtime packages from GitHub Releases, verifies SHA-256 hashes, writes `shinobi-launch.lua`, then starts the OTClient runtime.
+
+## Android Contract
+
+Android APKs are served from the website/GitHub Release flow, not Play Store. APK replacement requires the player to approve the install. Lua, modules, UI, images, configs, and mobile HUD assets update from `public/latest.json.android.runtimePackage` inside Android app storage after SHA-256 verification.

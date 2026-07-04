@@ -75,6 +75,9 @@
     "clientBuild": {
       "$ref": "#/$defs/clientBuild"
     },
+    "android": {
+      "$ref": "#/$defs/androidRelease"
+    },
     "compatibility": {
       "type": "object",
       "required": ["os", "architecture", "graphics", "prerequisiteMode"],
@@ -198,6 +201,56 @@
         },
         "updateMode": {
           "const": "launcher"
+        }
+      },
+      "additionalProperties": false
+    },
+    "androidRelease": {
+      "type": "object",
+      "required": [
+        "versionName",
+        "versionCode",
+        "minimumVersionCode",
+        "packageName",
+        "updateMode",
+        "downloadUrl",
+        "apk",
+        "runtimePackage"
+      ],
+      "properties": {
+        "versionName": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+        },
+        "versionCode": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimumVersionCode": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "packageName": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$"
+        },
+        "updateMode": {
+          "const": "website"
+        },
+        "downloadUrl": {
+          "type": "string"
+        },
+        "apk": {
+          "$ref": "#/$defs/artifact"
+        },
+        "runtimePackage": {
+          "$ref": "#/$defs/runtimePackage"
+        },
+        "acceptedRuntimePackages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clientBuildEntry"
+          }
         }
       },
       "additionalProperties": false

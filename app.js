@@ -5,6 +5,7 @@ async function loadLatestManifest() {
   const copyEl = document.querySelector("#download-copy");
   const metaEl = document.querySelector("#release-meta");
   const linkEl = document.querySelector("#download-link");
+  const androidLinkEl = document.querySelector("#android-download-link");
   const compatibilityEl = document.querySelector("#compatibility-summary");
   const notesEl = document.querySelector("#release-notes-link");
 
@@ -16,12 +17,20 @@ async function loadLatestManifest() {
 
     const manifest = await response.json();
     const installer = manifest.installer;
+    const androidApk = manifest.android && manifest.android.apk;
     const hasInstaller = Boolean(
       manifest.status === "available" &&
       installer &&
       installer.url &&
       installer.sha256 &&
       installer.sizeBytes > 0
+    );
+    const hasAndroidApk = Boolean(
+      manifest.status === "available" &&
+      androidApk &&
+      androidApk.url &&
+      androidApk.sha256 &&
+      androidApk.sizeBytes > 0
     );
 
     versionEl.textContent = manifest.version ? `v${manifest.version}` : "Unpublished";
@@ -50,6 +59,21 @@ async function loadLatestManifest() {
       linkEl.classList.add("is-disabled");
       linkEl.setAttribute("aria-disabled", "true");
     }
+
+    if (androidLinkEl) {
+      if (hasAndroidApk) {
+        androidLinkEl.href = androidApk.url;
+        androidLinkEl.hidden = false;
+        androidLinkEl.classList.remove("is-disabled");
+        androidLinkEl.removeAttribute("aria-disabled");
+      } else {
+        androidLinkEl.href = manifest.releaseNotesUrl || "https://github.com/frizas/shinobi-online/releases";
+        androidLinkEl.textContent = "Android coming soon";
+        androidLinkEl.hidden = false;
+        androidLinkEl.classList.add("is-disabled");
+        androidLinkEl.setAttribute("aria-disabled", "true");
+      }
+    }
   } catch (error) {
     versionEl.textContent = "Unavailable";
     installerEl.textContent = "Unknown";
@@ -57,6 +81,9 @@ async function loadLatestManifest() {
     copyEl.textContent = "The latest release could not be loaded.";
     metaEl.textContent = "";
     metaEl.hidden = true;
+    if (androidLinkEl) {
+      androidLinkEl.hidden = true;
+    }
     renderCompatibilitySummary(compatibilityEl, null);
   }
 }
