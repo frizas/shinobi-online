@@ -62,7 +62,7 @@ async function loadLatestManifest() {
 
     if (androidLinkEl) {
       if (hasAndroidApk) {
-        androidLinkEl.href = "/android.html";
+        androidLinkEl.href = androidApk.url;
         androidLinkEl.textContent = "Download for Android";
         androidLinkEl.hidden = false;
         androidLinkEl.classList.remove("is-disabled");
