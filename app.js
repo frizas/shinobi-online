@@ -62,7 +62,8 @@ async function loadLatestManifest() {
 
     if (androidLinkEl) {
       if (hasAndroidApk) {
-        androidLinkEl.href = androidApk.url;
+        androidLinkEl.href = "/android.html";
+        androidLinkEl.textContent = "Download for Android";
         androidLinkEl.hidden = false;
         androidLinkEl.classList.remove("is-disabled");
         androidLinkEl.removeAttribute("aria-disabled");

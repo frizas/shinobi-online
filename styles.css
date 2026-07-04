@@ -82,6 +82,14 @@ a {
   padding: 18px 0 0;
 }
 
+.hero--compact .hero__content {
+  justify-content: center;
+}
+
+.hero--compact h1 {
+  margin-bottom: 32px;
+}
+
 .eyebrow {
   margin: 0 0 10px var(--hero-text-indent);
   color: var(--amber);
@@ -254,6 +262,18 @@ h1 {
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.4;
+}
+
+.download-help {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.download-help li + li {
+  margin-top: 7px;
 }
 
 .site-footer {
