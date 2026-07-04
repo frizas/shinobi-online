@@ -4,7 +4,7 @@
   "channel": "production",
   "version": "0.1.32",
   "status": "available",
-  "publishedAt": "2026-07-04T00:31:57.5885724Z",
+  "publishedAt": "2026-07-04T08:14:08.7712045Z",
   "installer": {
     "fileName": "ShinobiOnlineSetup-0.1.32.exe",
     "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.32/ShinobiOnlineSetup-0.1.32.exe",
@@ -56,25 +56,31 @@
   "message": "Shinobi Online 0.1.32 is available.",
   "android": {
     "versionName": "0.1.32",
-    "versionCode": 1,
-    "minimumVersionCode": 1,
+    "versionCode": 3,
+    "minimumVersionCode": 3,
     "packageName": "com.highleveragestudios.shinobionline",
     "updateMode": "website",
     "downloadUrl": "https://shinobionline.vercel.app/",
     "apk": {
       "fileName": "ShinobiOnlineAndroid-0.1.32.apk",
       "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.32/ShinobiOnlineAndroid-0.1.32.apk",
-      "sha256": "42bfff11a50ea3d43f65d74852e33ede8517ec3907803f3ef58953a60bd8837a",
-      "sizeBytes": 83491612
+      "sha256": "b3b0b4d664b3c03cb50ac27bc74801ccad7da3f2b92b3b645ffc4964e15ee337",
+      "sizeBytes": 83633523
     },
     "runtimePackage": {
       "fileName": "ShinobiOnlineMobileRuntime-0.1.32.zip",
       "url": "https://github.com/frizas/shinobi-online/releases/download/v0.1.32/ShinobiOnlineMobileRuntime-0.1.32.zip",
-      "sha256": "a3eb68db52bc799a5de2a8b0ac6ec7e27af20d4136f7580999c98528ce294718",
-      "sizeBytes": 69288903,
-      "runtimeManifestSha256": "6455058f28867740a5aa020bebb49e47f15442cb058b02287a3abe6fca2361fb"
+      "sha256": "7bf2e45e73e191b76b2ddc474f0a9f72dbdf920a077b167cdb4c0673554f5451",
+      "sizeBytes": 67146216,
+      "runtimeManifestSha256": "42e3fd5dc1cad01893dbfef2a5114e942527e048157d6feaa79c526fddab7e58"
     },
     "acceptedRuntimePackages": [
+      {
+        "version": "0.1.32",
+        "token": "42e3fd5dc1cad01893dbfef2a5114e942527e048157d6feaa79c526fddab7e58",
+        "tokenKind": "runtimeManifestSha256",
+        "publishedAt": "2026-07-04T08:14:08.7712045Z"
+      },
       {
         "version": "0.1.32",
         "token": "6455058f28867740a5aa020bebb49e47f15442cb058b02287a3abe6fca2361fb",
