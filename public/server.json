@@ -4,11 +4,11 @@
   "status": "online",
   "mode": "pinggy",
   "loginHost": "172.237.54.212",
-  "loginPort": 46251,
+  "loginPort": 40885,
   "gameHost": "172.237.54.212",
-  "gamePort": 33319,
+  "gamePort": 44571,
   "protocol": 854,
-  "updatedAt": "2026-07-04T12:15:12.4180158Z",
-  "endpointRevision": 192,
-  "message": "Leaf is online. If you were disconnected, reopen the Shinobi Online Launcher and log in again."
+  "updatedAt": "2026-07-04T12:19:15.5944008Z",
+  "endpointRevision": 193,
+  "message": "Leaf is online. If you were disconnected, leave the client open to reconnect or log in again."
 }
