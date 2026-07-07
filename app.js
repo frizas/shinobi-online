@@ -70,7 +70,7 @@ async function loadLatestManifest() {
       } else {
         androidLinkEl.href = manifest.releaseNotesUrl || "https://github.com/frizas/shinobi-online/releases";
         androidLinkEl.textContent = "Android coming soon";
-        androidLinkEl.hidden = false;
+        androidLinkEl.hidden = true;
         androidLinkEl.classList.add("is-disabled");
         androidLinkEl.setAttribute("aria-disabled", "true");
       }
