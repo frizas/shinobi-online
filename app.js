@@ -1,3 +1,6 @@
+// Pinggy refreshes around 55 minutes; expire stale online manifests after a grace window.
+const SERVER_ONLINE_MAX_AGE_MS = 70 * 60 * 1000;
+
 async function loadLatestManifest() {
   const versionEl = document.querySelector("#release-version");
   const installerEl = document.querySelector("#release-installer");
@@ -151,13 +154,28 @@ async function loadServerManifest() {
     }
 
     const manifest = await response.json();
-    serverEl.textContent = formatServerStatus(manifest.status);
-    serverEl.dataset.status = manifest.status || "offline";
-    serverEl.title = manifest.message || "";
+    const status = getEffectiveServerStatus(manifest);
+    serverEl.textContent = formatServerStatus(status);
+    serverEl.dataset.status = status;
+    serverEl.title = status === manifest.status ? manifest.message || "" : "Server status expired. Try again later.";
   } catch {
     serverEl.textContent = "Unknown";
     serverEl.dataset.status = "unknown";
   }
+}
+
+function getEffectiveServerStatus(manifest, now = new Date()) {
+  const status = manifest && manifest.status;
+  if (status !== "online") {
+    return status || "offline";
+  }
+
+  const updatedAt = new Date(manifest.updatedAt);
+  if (Number.isNaN(updatedAt.getTime())) {
+    return "offline";
+  }
+
+  return now.getTime() - updatedAt.getTime() <= SERVER_ONLINE_MAX_AGE_MS ? "online" : "offline";
 }
 
 function formatServerStatus(status) {
@@ -190,5 +208,14 @@ function formatOs(os) {
   return os.replace("Windows 10 or newer", "Windows 10+");
 }
 
-loadLatestManifest();
-loadServerManifest();
+if (typeof document !== "undefined") {
+  loadLatestManifest();
+  loadServerManifest();
+}
+
+if (typeof module !== "undefined") {
+  module.exports = {
+    formatServerStatus,
+    getEffectiveServerStatus
+  };
+}
