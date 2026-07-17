@@ -46,7 +46,9 @@ async function loadLatestManifest() {
     }
 
     if (hasInstaller) {
-      copyEl.textContent = formatReleaseDateCopy(manifest.publishedAt);
+      copyEl.textContent = manifest.access && manifest.access.installerPasswordRequired
+        ? "Password-gated cutoff release. The installer will ask for the same access password."
+        : formatReleaseDateCopy(manifest.publishedAt);
       metaEl.textContent = "";
       metaEl.hidden = true;
       linkEl.href = installer.url;

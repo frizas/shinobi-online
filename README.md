@@ -46,6 +46,8 @@ The manifest should be updated after a release asset is published:
 }
 ```
 
+The temporary cutoff mode uses `SITE_ACCESS_PASSWORD` and `SITE_ACCESS_SIGNING_KEY` in Vercel production. It returns `404` for unauthenticated protected paths, keeps only `public/server.json` public for endpoint discovery, encrypts the installer, and does not publish a runtime updater asset.
+
 `public/server.json` is updated by the private operator repo when Leaf starts or stops.
 
 ## Validation

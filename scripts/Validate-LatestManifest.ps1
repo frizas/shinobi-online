@@ -138,6 +138,17 @@ if ($manifest.status -eq 'available') {
         throw 'available manifests require clientBuild metadata.'
     }
 
+    if ($manifest.access) {
+        if ($manifest.access.mode -ne 'password-gated' -or
+            !$manifest.access.installerPasswordRequired -or
+            $manifest.access.runtimeUpdaterEnabled) {
+            throw 'access metadata must describe a password-gated installer with the runtime updater disabled.'
+        }
+        if (@($manifest.clientBuild.accepted).Count -ne 1) {
+            throw 'password-gated cutoff releases must accept exactly one client build.'
+        }
+    }
+
     if ($manifest.clientBuild.updateMode -ne 'launcher') {
         throw 'clientBuild.updateMode must be launcher.'
     }

@@ -29,6 +29,8 @@ The website Windows download button reads `public/latest.json.installer.url`. Wh
 
 The launcher downloads full runtime packages from GitHub Releases, verifies SHA-256 hashes, writes `shinobi-launch.lua`, then starts the OTClient runtime.
 
+For a temporary password-gated cutoff release, the site is protected by Routing Middleware, the installer payload is encrypted with the same operator-provided password, and the runtime package is not uploaded. This intentionally prevents older launchers from upgrading themselves. `public/server.json` remains public so the accepted current client can discover Leaf.
+
 ## Android Contract
 
 Android APKs are served from the website/GitHub Release flow, not Play Store. APK replacement requires the player to approve the install. Lua, modules, UI, images, configs, and mobile HUD assets update from `public/latest.json.android.runtimePackage` inside Android app storage after SHA-256 verification.

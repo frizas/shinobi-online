@@ -1,0 +1,11 @@
+{
+  "name": "shinobi-online-public-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/Test-AccessGate.mjs && node scripts/Test-AppServerStatus.cjs"
+  },
+  "dependencies": {
+    "@vercel/functions": "3.7.5"
+  }
+}

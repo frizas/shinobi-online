@@ -75,6 +75,9 @@
     "clientBuild": {
       "$ref": "#/$defs/clientBuild"
     },
+    "access": {
+      "$ref": "#/$defs/access"
+    },
     "android": {
       "$ref": "#/$defs/androidRelease"
     },
@@ -133,6 +136,22 @@
     }
   ],
   "$defs": {
+    "access": {
+      "type": "object",
+      "required": ["mode", "installerPasswordRequired", "runtimeUpdaterEnabled"],
+      "properties": {
+        "mode": {
+          "const": "password-gated"
+        },
+        "installerPasswordRequired": {
+          "const": true
+        },
+        "runtimeUpdaterEnabled": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
     "artifact": {
       "type": "object",
       "required": ["fileName", "url", "sha256", "sizeBytes"],
