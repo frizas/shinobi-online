@@ -56,9 +56,10 @@ try {
     $provider.Dispose()
 }
 
-if ($manifest.schemaVersion -ne 3) {
-    throw 'schemaVersion must be 3.'
+if ($manifest.schemaVersion -notin @(3, 4)) {
+    throw 'schemaVersion must be 3 or 4.'
 }
+$expectedTokenKind = if ($manifest.schemaVersion -eq 4) { 'runtimeIdentitySha256' } else { 'runtimeManifestSha256' }
 
 if ($manifest.game -ne 'Shinobi Online') {
     throw 'game must be "Shinobi Online".'
@@ -157,8 +158,8 @@ function Assert-ClientBuildEntry {
         throw "$Name.token must be a lowercase 64-character SHA-256."
     }
 
-    if ($Entry.tokenKind -ne 'runtimeManifestSha256') {
-        throw "$Name.tokenKind must be runtimeManifestSha256."
+    if ($Entry.tokenKind -ne $expectedTokenKind) {
+        throw "$Name.tokenKind must be $expectedTokenKind."
     }
 
     if ([string]::IsNullOrWhiteSpace($Entry.publishedAt)) {
@@ -185,6 +186,23 @@ if ($manifest.status -eq 'available') {
     }
 
     Assert-ReleaseArtifact -Artifact $manifest.installer -Name 'installer'
+    if ($manifest.schemaVersion -eq 4) {
+        if (!$manifest.contentPack -or
+            $manifest.contentPack.format -cne 'ShinobiContentPack/1' -or
+            $manifest.contentPack.version -cne $manifest.version -or
+            $manifest.contentPack.contentRevision -lt 1 -or
+            $manifest.contentPack.indexSha256 -notmatch '^[a-f0-9]{64}$' -or
+            $manifest.contentPack.chunkBaseUrl -notmatch '^https://github\.com/frizas/shinobi-online/releases/download/[^/]+/$') {
+            throw 'contentPack metadata is invalid.'
+        }
+        Assert-ReleaseArtifact -Artifact $manifest.contentPack.index -Name 'contentPack.index'
+        Assert-ReleaseArtifact -Artifact $manifest.contentPack.signature -Name 'contentPack.signature'
+        if ($manifest.contentPack.index.sha256 -cne $manifest.contentPack.indexSha256) {
+            throw 'contentPack.index must match contentPack.indexSha256.'
+        }
+    } elseif ($manifest.PSObject.Properties.Name -contains 'contentPack') {
+        throw 'schemaVersion 3 must not publish contentPack metadata.'
+    }
     if ($manifest.PSObject.Properties.Name -contains 'runtimePackage') {
         throw 'runtimePackage is forbidden; v0.2 Windows updates are installer-only.'
     }
@@ -200,11 +218,13 @@ if ($manifest.status -eq 'available') {
     if (!$manifest.distribution -or
         $manifest.distribution.securityGeneration -cne 'v0.2' -or
         $manifest.distribution.runtimeUpdaterEnabled) {
-        throw 'distribution must identify v0.2 with the runtime updater disabled.'
+        throw 'distribution must identify v0.2 with the raw runtime updater disabled.'
     }
 
-    if ($manifest.clientBuild.updateMode -ne 'installer') {
-        throw 'clientBuild.updateMode must be installer.'
+    $expectedUpdateMode = if ($manifest.schemaVersion -eq 4) { 'content-or-installer' } else { 'installer' }
+    if ($manifest.clientBuild.updateMode -ne $expectedUpdateMode -or
+        ($manifest.schemaVersion -eq 4 -and !$manifest.distribution.contentUpdaterEnabled)) {
+        throw "clientBuild.updateMode must be $expectedUpdateMode and match distribution content-updater policy."
     }
 
     if ($manifest.clientBuild.minimumAcceptedVersion -notmatch '^\d+\.\d+\.\d+(-[A-Za-z0-9.-]+)?$') {
