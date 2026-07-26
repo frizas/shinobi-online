@@ -248,39 +248,54 @@ function normalizeServerManifest(manifest) {
 }
 
 async function serverManifestResponse() {
-  try {
-    const upstream = await fetch(
-      "https://raw.githubusercontent.com/frizas/shinobi-online/main/public/server.json",
-      {
+  const upstreams = [
+    {
+      url: "https://raw.githubusercontent.com/frizas/shinobi-online/main/public/server.json",
+      accept: "application/json"
+    },
+    {
+      url: "https://api.github.com/repos/frizas/shinobi-online/contents/public/server.json?ref=main",
+      accept: "application/vnd.github.raw"
+    }
+  ];
+
+  for (const candidate of upstreams) {
+    try {
+      const upstream = await fetch(candidate.url, {
         method: "GET",
-        headers: { accept: "application/json" },
+        headers: {
+          accept: candidate.accept,
+          "user-agent": "ShinobiOnlineStatusProxy/0.2"
+        },
         redirect: "error",
         cache: "no-store"
+      });
+      if (!upstream.ok) {
+        continue;
       }
-    );
-    if (!upstream.ok) {
-      throw new Error(`Server manifest upstream returned ${upstream.status}`);
-    }
 
-    const contentLength = Number(upstream.headers.get("content-length") || "0");
-    if (contentLength > 16384) {
-      throw new Error("Server manifest is too large");
+      const contentLength = Number(upstream.headers.get("content-length") || "0");
+      if (contentLength > 16384) {
+        continue;
+      }
+      const body = await upstream.text();
+      if (body.length > 16384) {
+        continue;
+      }
+      const manifest = normalizeServerManifest(JSON.parse(body));
+      return new Response(`${JSON.stringify(manifest)}\n`, {
+        status: 200,
+        headers: serverHeaders()
+      });
+    } catch {
+      // Try the independent GitHub API route before failing closed.
     }
-    const body = await upstream.text();
-    if (body.length > 16384) {
-      throw new Error("Server manifest is too large");
-    }
-    const manifest = normalizeServerManifest(JSON.parse(body));
-    return new Response(`${JSON.stringify(manifest)}\n`, {
-      status: 200,
-      headers: serverHeaders()
-    });
-  } catch {
-    return new Response('{"status":"offline"}\n', {
-      status: 503,
-      headers: serverHeaders()
-    });
   }
+
+  return new Response('{"status":"offline"}\n', {
+    status: 503,
+    headers: serverHeaders()
+  });
 }
 
 export default async function middleware(request) {

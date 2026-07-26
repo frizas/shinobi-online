@@ -102,6 +102,24 @@ const publicServerManifest = await middleware(new Request("https://shinobionline
 assert.equal(publicServerManifest.status, 200);
 assert.deepEqual(await publicServerManifest.json(), onlineManifest);
 
+const fallbackRequests = [];
+globalThis.fetch = async (url, options) => {
+  fallbackRequests.push({ url: String(url), accept: options.headers.accept });
+  if (String(url).startsWith("https://raw.githubusercontent.com/")) {
+    return new Response("unavailable", { status: 503 });
+  }
+  return new Response(JSON.stringify(onlineManifest), {
+    status: 200,
+    headers: { "content-type": "application/json" }
+  });
+};
+const fallbackServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
+assert.equal(fallbackServerManifest.status, 200);
+assert.deepEqual(await fallbackServerManifest.json(), onlineManifest);
+assert.equal(fallbackRequests.length, 2);
+assert.match(fallbackRequests[1].url, /^https:\/\/api\.github\.com\/repos\/frizas\/shinobi-online\/contents\/public\/server\.json/);
+assert.equal(fallbackRequests[1].accept, "application/vnd.github.raw");
+
 globalThis.fetch = async () => {
   throw new Error("upstream unavailable");
 };
