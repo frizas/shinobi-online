@@ -4,6 +4,7 @@
   "devCommand": null,
   "installCommand": null,
   "outputDirectory": ".",
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ':(exclude)public/server.json'",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
