@@ -19,13 +19,30 @@
     "message"
   ],
   "properties": {
-    "schemaVersion": { "const": 3 },
+    "schemaVersion": { "enum": [3, 4] },
     "game": { "const": "Shinobi Online" },
     "channel": { "enum": ["production", "staging"] },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$" },
     "status": { "enum": ["pending-release", "available", "withdrawn"] },
     "publishedAt": { "type": "string" },
     "installer": { "$ref": "#/$defs/artifact" },
+    "contentPack": {
+      "type": "object",
+      "required": ["format", "version", "contentRevision", "indexSha256", "index", "signature", "chunkBaseUrl"],
+      "properties": {
+        "format": { "const": "ShinobiContentPack/1" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$" },
+        "contentRevision": { "type": "integer", "minimum": 1 },
+        "indexSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "index": { "$ref": "#/$defs/artifact" },
+        "signature": { "$ref": "#/$defs/artifact" },
+        "chunkBaseUrl": {
+          "type": "string",
+          "pattern": "^https://github\\.com/frizas/shinobi-online/releases/download/[^/]+/$"
+        }
+      },
+      "additionalProperties": false
+    },
     "launcher": {
       "type": "object",
       "required": ["currentVersion", "minimumVersion"],
@@ -47,7 +64,7 @@
           "items": { "$ref": "#/$defs/build" }
         },
         "minimumAcceptedVersion": { "type": "string" },
-        "updateMode": { "const": "installer" }
+        "updateMode": { "enum": ["installer", "content-or-installer"] }
       },
       "additionalProperties": false
     },
@@ -56,7 +73,8 @@
       "required": ["securityGeneration", "runtimeUpdaterEnabled"],
       "properties": {
         "securityGeneration": { "const": "v0.2" },
-        "runtimeUpdaterEnabled": { "const": false }
+        "runtimeUpdaterEnabled": { "const": false },
+        "contentUpdaterEnabled": { "type": "boolean" }
       },
       "additionalProperties": false
     },
@@ -82,7 +100,7 @@
       "properties": {
         "version": { "type": "string" },
         "token": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "tokenKind": { "const": "runtimeManifestSha256" },
+        "tokenKind": { "enum": ["runtimeManifestSha256", "runtimeIdentitySha256"] },
         "publishedAt": { "type": "string" }
       },
       "additionalProperties": false
