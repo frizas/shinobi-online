@@ -8,7 +8,7 @@
   "gameHost": "",
   "gamePort": 0,
   "protocol": 854,
-  "updatedAt": "2026-07-26T07:23:18.2894840Z",
-  "endpointRevision": 542,
-  "message": "Leaf is updating. Try again shortly."
+  "updatedAt": "2026-07-26T07:24:55.6387720Z",
+  "endpointRevision": 543,
+  "message": "Server is reconnecting through the free fallback tunnel. Try again shortly."
 }
