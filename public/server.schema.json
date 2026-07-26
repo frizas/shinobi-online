@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shinobionline.vercel.app/public/server.schema.json",
+  "title": "Shinobi Online Leaf server manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "serverName",
+    "status",
+    "mode",
+    "loginHost",
+    "loginPort",
+    "gameHost",
+    "gamePort",
+    "protocol",
+    "updatedAt",
+    "endpointRevision",
+    "message"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "serverName": {
+      "const": "Leaf"
+    },
+    "status": {
+      "enum": ["online", "offline", "maintenance"]
+    },
+    "mode": {
+      "enum": ["pinggy", "stable"]
+    },
+    "loginHost": {
+      "type": ["string", "null"]
+    },
+    "loginPort": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "gameHost": {
+      "type": ["string", "null"]
+    },
+    "gamePort": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "protocol": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "updatedAt": {
+      "type": "string"
+    },
+    "endpointRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "message": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "online"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "loginHost": {
+            "type": "string",
+            "minLength": 1
+          },
+          "loginPort": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "gameHost": {
+            "type": "string",
+            "minLength": 1
+          },
+          "gamePort": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

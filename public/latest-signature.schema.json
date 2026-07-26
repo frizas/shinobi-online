@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shinobionline.vercel.app/public/latest-signature.schema.json",
+  "title": "Shinobi Online release manifest signature",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "algorithm",
+    "keyId",
+    "manifestSha256",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "algorithm": {
+      "const": "RSASSA-PKCS1-v1_5-SHA256"
+    },
+    "keyId": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "manifestSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 512,
+      "maxLength": 512
+    }
+  }
+}

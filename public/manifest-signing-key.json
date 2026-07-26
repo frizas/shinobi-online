@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "RSASSA-PKCS1-v1_5-SHA256",
+  "keyId": "sha256:914938ffbb4a5d3bd72a92c9ca27031041377c9adfa493b993ec1bbc36dab480",
+  "modulus": "smA9mLw7jtfj2kUjg0xjaVH3RgiDpFbf0A6a2ue+DMFCn4NzWm0kl3e5xswwj8/L6MytrNO7+5soZpf/vVc9gfOciJQjktCdkzAe06PsZ+aQ0sF0z4dVi2ydbTftNlxRaHZmiV5K2s6EoE5YDG6JtIeJYtetnHMQD4wvGLEGlnFzd0KJQhqgfjB72dHoriUBHwildOLYxtRuWWJGzW0AHUfX45PGF86TSqIjlVg4UFClJuKVQfcB2FpiCzknWjj8+FrB9YBYt00OuTH8947/uUtseYVSY8H3C0ly62Eh4VD6vjE83002Mb3SlS+85zNJq0cLGo/fP3nQglmvJKGveochhl/pzeskzPvq+6Wu3w7XEiy8VJ0lplF5SPX5MThzV7bD+yZlc2RusUvSq24rpDEtKVo00Z1+tkhBGWadSmK655SCEHJCNbcOCHZpjWNG8IyeB0DNFZ4JZntre2RB1KFrvKXUhnbAV9GeE2ulIJOeFmyfGeh+wddZXVROuUtB",
+  "exponent": "AQAB"
+}

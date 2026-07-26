@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shinobionline.vercel.app/public/v0.2/latest.schema.json",
+  "title": "Shinobi Online v0.2 release manifest",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "game",
+    "channel",
+    "version",
+    "status",
+    "publishedAt",
+    "installer",
+    "launcher",
+    "clientBuild",
+    "distribution",
+    "compatibility",
+    "releaseNotesUrl",
+    "message"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 3 },
+    "game": { "const": "Shinobi Online" },
+    "channel": { "enum": ["production", "staging"] },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$" },
+    "status": { "enum": ["pending-release", "available", "withdrawn"] },
+    "publishedAt": { "type": "string" },
+    "installer": { "$ref": "#/$defs/artifact" },
+    "launcher": {
+      "type": "object",
+      "required": ["currentVersion", "minimumVersion"],
+      "properties": {
+        "currentVersion": { "type": "string" },
+        "minimumVersion": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "clientBuild": {
+      "type": "object",
+      "required": ["current", "accepted", "minimumAcceptedVersion", "updateMode"],
+      "properties": {
+        "current": { "$ref": "#/$defs/build" },
+        "accepted": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/build" }
+        },
+        "minimumAcceptedVersion": { "type": "string" },
+        "updateMode": { "const": "installer" }
+      },
+      "additionalProperties": false
+    },
+    "distribution": {
+      "type": "object",
+      "required": ["securityGeneration", "runtimeUpdaterEnabled"],
+      "properties": {
+        "securityGeneration": { "const": "v0.2" },
+        "runtimeUpdaterEnabled": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "compatibility": { "type": "object" },
+    "releaseNotesUrl": { "type": "string", "format": "uri" },
+    "message": { "type": "string" }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": ["fileName", "url", "sha256", "sizeBytes"],
+      "properties": {
+        "fileName": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sizeBytes": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "build": {
+      "type": "object",
+      "required": ["version", "token", "tokenKind", "publishedAt"],
+      "properties": {
+        "version": { "type": "string" },
+        "token": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "tokenKind": { "const": "runtimeManifestSha256" },
+        "publishedAt": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
