@@ -93,10 +93,14 @@ const throttledCorrectResponse = await middleware(new Request("https://shinobion
 }));
 assert.equal(throttledCorrectResponse.status, 404);
 
-const protectedManifest = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.json"));
-assert.equal(protectedManifest.status, 404);
-const protectedSignature = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.sig"));
-assert.equal(protectedSignature.status, 404);
+const publicManifest = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.json"));
+assert.equal(publicManifest.headers.get("x-middleware-next"), "1");
+const publicSignature = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.sig"));
+assert.equal(publicSignature.headers.get("x-middleware-next"), "1");
+const manifestPost = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.json", {
+  method: "POST"
+}));
+assert.equal(manifestPost.status, 404);
 
 const publicServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
 assert.equal(publicServerManifest.status, 200);
@@ -126,4 +130,4 @@ globalThis.fetch = async () => {
 const unavailableServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
 assert.equal(unavailableServerManifest.status, 503);
 
-console.log("Access gate OK: signed session, generic failures, bounded throttle, v0.2 manifest protected, server status proxied.");
+console.log("Access gate OK: signed session, generic failures, bounded throttle, signed v0.2 metadata public, server status proxied.");

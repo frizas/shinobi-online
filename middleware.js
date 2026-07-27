@@ -301,6 +301,18 @@ async function serverManifestResponse() {
 export default async function middleware(request) {
   const url = new URL(request.url);
 
+  // Launchers cannot complete the authenticated update flow with a browser
+  // session cookie. The signed release manifest and its detached signature are
+  // intentionally public metadata; the runtime still verifies that signature
+  // before it trusts any release fields.
+  if (
+    request.method === "GET" &&
+    (url.pathname === "/public/v0.2/latest.json" ||
+      url.pathname === "/public/v0.2/latest.sig")
+  ) {
+    return next();
+  }
+
   // Endpoint discovery stays public, but is fetched server-side so the browser
   // never follows a cross-origin redirect that its CSP would reject.
   if (url.pathname === "/public/server.json" && request.method === "GET") {
