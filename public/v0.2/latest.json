@@ -2,54 +2,54 @@
   "schemaVersion": 4,
   "game": "Shinobi Online",
   "channel": "production",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "status": "available",
-  "publishedAt": "2026-07-27T21:31:46.4370560Z",
+  "publishedAt": "2026-07-27T22:46:57.4614377Z",
   "installer": {
-    "fileName": "ShinobiOnlineSetup-0.2.9.exe",
-    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.2.9/ShinobiOnlineSetup-0.2.9.exe",
-    "sha256": "0857943bc2eece73441c6daaa1fdd6d04c81eec8b07e791f9994ce7a64a9a712",
-    "sizeBytes": 135229394
+    "fileName": "ShinobiOnlineSetup-0.2.10.exe",
+    "url": "https://github.com/frizas/shinobi-online/releases/download/v0.2.10/ShinobiOnlineSetup-0.2.10.exe",
+    "sha256": "054e6f5ae7ab60ed0d3fb7fbc33dce066289255a0631462a2f858df820919494",
+    "sizeBytes": 134057596
   },
   "contentPack": {
     "format": "ShinobiContentPack/1",
-    "version": "0.2.9",
-    "contentRevision": 2009,
-    "indexSha256": "d0edfed056e2610168b4771d368735db14030d845c92bf3fe1f431397accf428",
+    "version": "0.2.10",
+    "contentRevision": 2010,
+    "indexSha256": "1990659e470cc491ee3e88c9ae7b919c88f5edca91d721e8fc1c07537456bd33",
     "index": {
-      "fileName": "d0edfed056e2610168b4771d368735db14030d845c92bf3fe1f431397accf428.json",
-      "url": "https://github.com/frizas/shinobi-online/releases/download/v0.2.9/d0edfed056e2610168b4771d368735db14030d845c92bf3fe1f431397accf428.json",
-      "sha256": "d0edfed056e2610168b4771d368735db14030d845c92bf3fe1f431397accf428",
-      "sizeBytes": 1029632
+      "fileName": "1990659e470cc491ee3e88c9ae7b919c88f5edca91d721e8fc1c07537456bd33.svc",
+      "url": "https://github.com/frizas/shinobi-online/releases/download/v0.2.10/1990659e470cc491ee3e88c9ae7b919c88f5edca91d721e8fc1c07537456bd33.svc",
+      "sha256": "1990659e470cc491ee3e88c9ae7b919c88f5edca91d721e8fc1c07537456bd33",
+      "sizeBytes": 1051065
     },
     "signature": {
-      "fileName": "d0edfed056e2610168b4771d368735db14030d845c92bf3fe1f431397accf428.sig",
-      "url": "https://github.com/frizas/shinobi-online/releases/download/v0.2.9/d0edfed056e2610168b4771d368735db14030d845c92bf3fe1f431397accf428.sig",
-      "sha256": "1f06a2fe26e2bc800dd068aa226c51315999d52e4b7a100ed0cb8a80d0ae98af",
+      "fileName": "1990659e470cc491ee3e88c9ae7b919c88f5edca91d721e8fc1c07537456bd33.svs",
+      "url": "https://github.com/frizas/shinobi-online/releases/download/v0.2.10/1990659e470cc491ee3e88c9ae7b919c88f5edca91d721e8fc1c07537456bd33.svs",
+      "sha256": "8f22d853f0883a50cb7c5f6669bf7f41a4861f28fa7096f91142c87c59e15080",
       "sizeBytes": 773
     },
-    "chunkBaseUrl": "https://github.com/frizas/shinobi-online/releases/download/v0.2.9/"
+    "chunkBaseUrl": "https://github.com/frizas/shinobi-online/releases/download/v0.2.10/"
   },
   "launcher": {
-    "currentVersion": "0.3.2",
-    "minimumVersion": "0.3.2"
+    "currentVersion": "0.3.3",
+    "minimumVersion": "0.3.3"
   },
   "clientBuild": {
     "current": {
-      "version": "0.2.9",
-      "token": "9d21ef1332b53bd9cb3734fe76fd5b384a186436cee8392760904c7dc184458d",
+      "version": "0.2.10",
+      "token": "fe68631009f21d12ad8ef1f0d729312ace3ee9ca4330fa201972e864dd64378c",
       "tokenKind": "runtimeIdentitySha256",
-      "publishedAt": "2026-07-27T21:31:46.4370560Z"
+      "publishedAt": "2026-07-27T22:46:57.4614377Z"
     },
     "accepted": [
       {
-        "version": "0.2.9",
-        "token": "9d21ef1332b53bd9cb3734fe76fd5b384a186436cee8392760904c7dc184458d",
+        "version": "0.2.10",
+        "token": "fe68631009f21d12ad8ef1f0d729312ace3ee9ca4330fa201972e864dd64378c",
         "tokenKind": "runtimeIdentitySha256",
-        "publishedAt": "2026-07-27T21:31:46.4370560Z"
+        "publishedAt": "2026-07-27T22:46:57.4614377Z"
       }
     ],
-    "minimumAcceptedVersion": "0.2.9",
+    "minimumAcceptedVersion": "0.2.10",
     "updateMode": "content-or-installer"
   },
   "compatibility": {
@@ -58,11 +58,11 @@
     "graphics": "OpenGL-capable GPU driver",
     "prerequisiteMode": "detect-and-guide"
   },
-  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases/tag/v0.2.9",
+  "releaseNotesUrl": "https://github.com/frizas/shinobi-online/releases/tag/v0.2.10",
   "distribution": {
     "securityGeneration": "v0.2",
     "runtimeUpdaterEnabled": false,
     "contentUpdaterEnabled": true
   },
-  "message": "Shinobi Online 0.2.9 is available."
+  "message": "Shinobi Online 0.2.10 is available."
 }
