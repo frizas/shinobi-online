@@ -4,11 +4,11 @@
   "status": "online",
   "mode": "pinggy",
   "loginHost": "172.235.48.89",
-  "loginPort": 43783,
+  "loginPort": 36939,
   "gameHost": "172.235.48.89",
-  "gamePort": 39507,
+  "gamePort": 34925,
   "protocol": 854,
-  "updatedAt": "2026-07-31T02:33:01.2778881Z",
-  "endpointRevision": 632,
+  "updatedAt": "2026-07-31T04:22:12.3910762Z",
+  "endpointRevision": 633,
   "message": "Leaf is online. If you were disconnected, leave the client open to reconnect or log in again."
 }
