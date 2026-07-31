@@ -36,6 +36,8 @@
         "indexSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "index": { "$ref": "#/$defs/artifact" },
         "signature": { "$ref": "#/$defs/artifact" },
+        "activation": { "$ref": "#/$defs/artifact" },
+        "activationSignature": { "$ref": "#/$defs/artifact" },
         "chunkBaseUrl": {
           "type": "string",
           "pattern": "^https://github\\.com/frizas/shinobi-online/releases/download/[^/]+/$"
@@ -100,11 +102,55 @@
       "properties": {
         "version": { "type": "string" },
         "token": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "tokenKind": { "enum": ["runtimeManifestSha256", "runtimeIdentitySha256"] },
+        "tokenKind": {
+          "enum": [
+            "runtimeManifestSha256",
+            "runtimeIdentitySha256",
+            "shinobiContentIndexSha256"
+          ]
+        },
         "publishedAt": { "type": "string" }
       },
       "additionalProperties": false
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "clientBuild": {
+            "properties": {
+              "current": {
+                "properties": {
+                  "tokenKind": { "const": "shinobiContentIndexSha256" }
+                },
+                "required": ["tokenKind"]
+              }
+            },
+            "required": ["current"]
+          }
+        },
+        "required": ["clientBuild"]
+      },
+      "then": {
+        "properties": {
+          "contentPack": {
+            "required": [
+              "format",
+              "version",
+              "contentRevision",
+              "indexSha256",
+              "index",
+              "signature",
+              "activation",
+              "activationSignature",
+              "chunkBaseUrl"
+            ]
+          }
+        },
+        "required": ["contentPack"]
+      }
+    }
+  ],
   "additionalProperties": false
 }
