@@ -19,10 +19,22 @@ const onlineManifest = {
   endpointRevision: 1,
   message: "Leaf is online."
 };
-globalThis.fetch = async () => new Response(JSON.stringify(onlineManifest), {
-  status: 200,
-  headers: { "content-type": "application/json" }
-});
+const onlineManifestBytes = `${JSON.stringify(onlineManifest, null, 2)}\n`;
+const serverSignatureEnvelope = {
+  schemaVersion: 1,
+  algorithm: "RSASSA-PKCS1-v1_5-SHA256",
+  keyId: `sha256:${"a".repeat(64)}`,
+  manifestSha256: "b".repeat(64),
+  signature: "c".repeat(512)
+};
+const serverSignatureBytes = `${JSON.stringify(serverSignatureEnvelope, null, 2)}\n`;
+globalThis.fetch = async (url) => new Response(
+  String(url).includes("server.sig") ? serverSignatureBytes : onlineManifestBytes,
+  {
+    status: 200,
+    headers: { "content-type": "application/json" }
+  }
+);
 
 const rootRequest = new Request("https://shinobionline.vercel.app/");
 const loginResponse = await middleware(rootRequest);
@@ -104,7 +116,10 @@ assert.equal(manifestPost.status, 404);
 
 const publicServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
 assert.equal(publicServerManifest.status, 200);
-assert.deepEqual(await publicServerManifest.json(), onlineManifest);
+assert.equal(await publicServerManifest.text(), onlineManifestBytes);
+const publicServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
+assert.equal(publicServerSignature.status, 200);
+assert.equal(await publicServerSignature.text(), serverSignatureBytes);
 
 const fallbackRequests = [];
 globalThis.fetch = async (url, options) => {
@@ -112,22 +127,29 @@ globalThis.fetch = async (url, options) => {
   if (String(url).startsWith("https://raw.githubusercontent.com/")) {
     return new Response("unavailable", { status: 503 });
   }
-  return new Response(JSON.stringify(onlineManifest), {
+  return new Response(String(url).includes("server.sig") ? serverSignatureBytes : onlineManifestBytes, {
     status: 200,
     headers: { "content-type": "application/json" }
   });
 };
 const fallbackServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
 assert.equal(fallbackServerManifest.status, 200);
-assert.deepEqual(await fallbackServerManifest.json(), onlineManifest);
+assert.equal(await fallbackServerManifest.text(), onlineManifestBytes);
 assert.equal(fallbackRequests.length, 2);
 assert.match(fallbackRequests[1].url, /^https:\/\/api\.github\.com\/repos\/frizas\/shinobi-online\/contents\/public\/server\.json/);
 assert.equal(fallbackRequests[1].accept, "application/vnd.github.raw");
+const fallbackServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
+assert.equal(fallbackServerSignature.status, 200);
+assert.equal(await fallbackServerSignature.text(), serverSignatureBytes);
+assert.equal(fallbackRequests.length, 4);
+assert.match(fallbackRequests[3].url, /^https:\/\/api\.github\.com\/repos\/frizas\/shinobi-online\/contents\/public\/server\.sig/);
 
 globalThis.fetch = async () => {
   throw new Error("upstream unavailable");
 };
 const unavailableServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
 assert.equal(unavailableServerManifest.status, 503);
+const unavailableServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
+assert.equal(unavailableServerSignature.status, 503);
 
-console.log("Access gate OK: signed session, generic failures, bounded throttle, signed v0.2 metadata public, server status proxied.");
+console.log("Access gate OK: signed session, generic failures, bounded throttle, signed v0.2 and exact server metadata public.");

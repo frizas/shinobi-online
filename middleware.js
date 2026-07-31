@@ -247,14 +247,37 @@ function normalizeServerManifest(manifest) {
   };
 }
 
-async function serverManifestResponse() {
+function normalizeServerSignature(signature) {
+  if (!signature ||
+      signature.schemaVersion !== 1 ||
+      signature.algorithm !== "RSASSA-PKCS1-v1_5-SHA256" ||
+      typeof signature.keyId !== "string" ||
+      !/^sha256:[a-f0-9]{64}$/.test(signature.keyId) ||
+      typeof signature.manifestSha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(signature.manifestSha256) ||
+      typeof signature.signature !== "string" ||
+      signature.signature.length < 128 ||
+      signature.signature.length > 2048) {
+    throw new Error("Invalid server manifest signature envelope");
+  }
+  return signature;
+}
+
+async function serverMetadataResponse(fileName) {
+  if (fileName !== "server.json" && fileName !== "server.sig") {
+    return new Response('{"status":"offline"}\n', {
+      status: 503,
+      headers: serverHeaders()
+    });
+  }
+
   const upstreams = [
     {
-      url: "https://raw.githubusercontent.com/frizas/shinobi-online/main/public/server.json",
+      url: `https://raw.githubusercontent.com/frizas/shinobi-online/main/public/${fileName}`,
       accept: "application/json"
     },
     {
-      url: "https://api.github.com/repos/frizas/shinobi-online/contents/public/server.json?ref=main",
+      url: `https://api.github.com/repos/frizas/shinobi-online/contents/public/${fileName}?ref=main`,
       accept: "application/vnd.github.raw"
     }
   ];
@@ -282,8 +305,13 @@ async function serverManifestResponse() {
       if (body.length > 16384) {
         continue;
       }
-      const manifest = normalizeServerManifest(JSON.parse(body));
-      return new Response(`${JSON.stringify(manifest)}\n`, {
+      const parsed = JSON.parse(body);
+      if (fileName === "server.json") {
+        normalizeServerManifest(parsed);
+      } else {
+        normalizeServerSignature(parsed);
+      }
+      return new Response(body, {
         status: 200,
         headers: serverHeaders()
       });
@@ -313,10 +341,13 @@ export default async function middleware(request) {
     return next();
   }
 
-  // Endpoint discovery stays public, but is fetched server-side so the browser
-  // never follows a cross-origin redirect that its CSP would reject.
-  if (url.pathname === "/public/server.json" && request.method === "GET") {
-    return serverManifestResponse();
+  // Signed endpoint discovery stays public, but is fetched server-side so the
+  // client never follows a cross-origin redirect that its CSP would reject.
+  if (
+    request.method === "GET" &&
+    (url.pathname === "/public/server.json" || url.pathname === "/public/server.sig")
+  ) {
+    return serverMetadataResponse(url.pathname.endsWith(".sig") ? "server.sig" : "server.json");
   }
 
   const secrets = getSecrets();
