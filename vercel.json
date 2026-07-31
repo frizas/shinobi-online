@@ -4,7 +4,7 @@
   "devCommand": null,
   "installCommand": null,
   "outputDirectory": ".",
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ':(exclude)public/server.json'",
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ':(exclude)public/server.json' ':(exclude)public/server.sig'",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
@@ -116,6 +116,19 @@
     },
     {
       "source": "/public/server.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=30, s-maxage=30"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/public/server.sig",
       "headers": [
         {
           "key": "Cache-Control",

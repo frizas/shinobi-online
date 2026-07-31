@@ -1,3 +1,5 @@
 public/v0.2/latest.json text eol=lf
 public/v0.2/latest.sig text eol=lf
 public/manifest-signing-key.json text eol=lf
+public/server.json text eol=lf
+public/server.sig text eol=lf
