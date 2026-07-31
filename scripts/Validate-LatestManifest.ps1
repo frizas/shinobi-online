@@ -59,7 +59,6 @@ try {
 if ($manifest.schemaVersion -notin @(3, 4)) {
     throw 'schemaVersion must be 3 or 4.'
 }
-$expectedTokenKind = if ($manifest.schemaVersion -eq 4) { 'runtimeIdentitySha256' } else { 'runtimeManifestSha256' }
 
 if ($manifest.game -ne 'Shinobi Online') {
     throw 'game must be "Shinobi Online".'
@@ -75,6 +74,14 @@ if ($manifest.version -notmatch '^\d+\.\d+\.\d+(-[A-Za-z0-9.-]+)?$') {
 
 if ([Version]($manifest.version.Split('-', 2)[0]) -lt [Version]'0.2.0') {
     throw 'version must be 0.2.0 or newer.'
+}
+$normalizedManifestVersion = [Version]($manifest.version.Split('-', 2)[0])
+$expectedTokenKind = if ($manifest.schemaVersion -eq 3) {
+    'runtimeManifestSha256'
+} elseif ($normalizedManifestVersion -ge [Version]'0.4.13') {
+    'shinobiContentIndexSha256'
+} else {
+    'runtimeIdentitySha256'
 }
 
 if ($manifest.status -notin @('pending-release', 'available', 'withdrawn')) {
@@ -200,6 +207,10 @@ if ($manifest.status -eq 'available') {
         if ($manifest.contentPack.index.sha256 -cne $manifest.contentPack.indexSha256) {
             throw 'contentPack.index must match contentPack.indexSha256.'
         }
+        if ($expectedTokenKind -ceq 'shinobiContentIndexSha256') {
+            Assert-ReleaseArtifact -Artifact $manifest.contentPack.activation -Name 'contentPack.activation'
+            Assert-ReleaseArtifact -Artifact $manifest.contentPack.activationSignature -Name 'contentPack.activationSignature'
+        }
     } elseif ($manifest.PSObject.Properties.Name -contains 'contentPack') {
         throw 'schemaVersion 3 must not publish contentPack metadata.'
     }
@@ -240,6 +251,19 @@ if ($manifest.status -eq 'available') {
 
     for ($i = 0; $i -lt $acceptedBuilds.Count; $i++) {
         Assert-ClientBuildEntry -Entry $acceptedBuilds[$i] -Name "clientBuild.accepted[$i]"
+    }
+
+    if ($expectedTokenKind -ceq 'shinobiContentIndexSha256' -and
+        $manifest.clientBuild.current.token -cne $manifest.contentPack.indexSha256) {
+        throw 'clientBuild.current.token must match contentPack.indexSha256 for native content-index releases.'
+    }
+
+    $acceptedCurrent = $acceptedBuilds[0]
+    if ($acceptedCurrent.version -cne $manifest.clientBuild.current.version -or
+        $acceptedCurrent.token -cne $manifest.clientBuild.current.token -or
+        $acceptedCurrent.tokenKind -cne $manifest.clientBuild.current.tokenKind -or
+        $acceptedCurrent.publishedAt -cne $manifest.clientBuild.current.publishedAt) {
+        throw 'clientBuild.accepted must contain the exact current build.'
     }
 
     if ($manifest.PSObject.Properties.Name -contains 'android') {
