@@ -8,7 +8,7 @@
   "gameHost": "",
   "gamePort": 0,
   "protocol": 854,
-  "updatedAt": "2026-08-09T08:39:46.2740222Z",
-  "endpointRevision": 739,
-  "message": "Server offline. Try again later."
+  "updatedAt": "2026-08-09T09:01:08.8390499Z",
+  "endpointRevision": 740,
+  "message": "Maintenance: production integrity recovery in progress. Login is temporarily disabled."
 }
