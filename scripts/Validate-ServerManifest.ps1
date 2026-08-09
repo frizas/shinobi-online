@@ -55,8 +55,8 @@ try {
     $provider.Dispose()
 }
 
-if ($manifest.schemaVersion -ne 1) {
-    throw 'schemaVersion must be 1.'
+if ($manifest.schemaVersion -notin @(1, 2)) {
+    throw 'schemaVersion must be 1 or 2.'
 }
 
 if ($manifest.serverName -ne 'Leaf') {
@@ -88,12 +88,33 @@ if ([string]::IsNullOrWhiteSpace($manifest.message)) {
 }
 
 if ($manifest.status -eq 'online') {
+    if ([int]$manifest.schemaVersion -ne 2 -or [int]$manifest.acceptanceSchemaVersion -ne 1) {
+        throw 'online manifests require schemaVersion 2 and acceptanceSchemaVersion 1.'
+    }
+    if ([string]$manifest.onlineAcceptanceToken -notmatch '^[a-f0-9]{64}$') {
+        throw 'online manifests require a 64-character onlineAcceptanceToken.'
+    }
+    if ([string]$manifest.clientBuildToken -notmatch '^[a-f0-9]{40,64}$') {
+        throw 'online manifests require the accepted clientBuildToken.'
+    }
+    if ([string]$manifest.releaseVersion -notmatch '^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$') {
+        throw 'online manifests require an accepted v-prefixed releaseVersion.'
+    }
     if ([string]::IsNullOrWhiteSpace($manifest.loginHost) -or [int]$manifest.loginPort -lt 1) {
         throw 'online manifests require loginHost and loginPort.'
     }
 
     if ([string]::IsNullOrWhiteSpace($manifest.gameHost) -or [int]$manifest.gamePort -lt 1) {
         throw 'online manifests require gameHost and gamePort.'
+    }
+} elseif ([int]$manifest.schemaVersion -eq 2) {
+    if ([int]$manifest.acceptanceSchemaVersion -ne 1) {
+        throw 'schemaVersion 2 manifests require acceptanceSchemaVersion 1.'
+    }
+    foreach ($field in @('onlineAcceptanceToken', 'clientBuildToken', 'releaseVersion')) {
+        if ($null -ne $manifest.$field -and ![string]::IsNullOrWhiteSpace([string]$manifest.$field)) {
+            throw "Non-online manifests must clear $field."
+        }
     }
 }
 

@@ -19,7 +19,19 @@
   ],
   "properties": {
     "schemaVersion": {
-      "const": 1
+      "enum": [1, 2]
+    },
+    "acceptanceSchemaVersion": {
+      "type": ["integer", "null"]
+    },
+    "onlineAcceptanceToken": {
+      "type": ["string", "null"]
+    },
+    "clientBuildToken": {
+      "type": ["string", "null"]
+    },
+    "releaseVersion": {
+      "type": ["string", "null"]
     },
     "serverName": {
       "const": "Leaf"
@@ -71,7 +83,31 @@
         }
       },
       "then": {
+        "required": [
+          "acceptanceSchemaVersion",
+          "onlineAcceptanceToken",
+          "clientBuildToken",
+          "releaseVersion"
+        ],
         "properties": {
+          "schemaVersion": {
+            "const": 2
+          },
+          "acceptanceSchemaVersion": {
+            "const": 1
+          },
+          "onlineAcceptanceToken": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "clientBuildToken": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40,64}$"
+          },
+          "releaseVersion": {
+            "type": "string",
+            "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+          },
           "loginHost": {
             "type": "string",
             "minLength": 1
