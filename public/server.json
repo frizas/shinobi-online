@@ -1,5 +1,6 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "acceptanceSchemaVersion": 1,
   "serverName": "Leaf",
   "status": "maintenance",
   "mode": "pinggy",
@@ -8,7 +9,10 @@
   "gameHost": "",
   "gamePort": 0,
   "protocol": 854,
-  "updatedAt": "2026-08-09T09:01:08.8390499Z",
-  "endpointRevision": 740,
-  "message": "Maintenance: production integrity recovery in progress. Login is temporarily disabled."
+  "onlineAcceptanceToken": "",
+  "clientBuildToken": "",
+  "releaseVersion": "",
+  "updatedAt": "2026-08-09T18:14:00.5548866Z",
+  "endpointRevision": 741,
+  "message": "Maintenance: a new production candidate is being validated and published. Login is temporarily disabled."
 }
