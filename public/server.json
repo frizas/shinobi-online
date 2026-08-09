@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "serverName": "Leaf",
-  "status": "offline",
+  "status": "online",
   "mode": "pinggy",
-  "loginHost": "",
-  "loginPort": 0,
-  "gameHost": "",
-  "gamePort": 0,
+  "loginHost": "45.33.62.68",
+  "loginPort": 45931,
+  "gameHost": "45.33.62.68",
+  "gamePort": 36341,
   "protocol": 854,
-  "updatedAt": "2026-08-05T21:03:40.9238214Z",
-  "endpointRevision": 737,
-  "message": "Server offline. Try again later."
+  "updatedAt": "2026-08-09T08:26:26.2895026Z",
+  "endpointRevision": 738,
+  "message": "Leaf is online. If you were disconnected, leave the client open to reconnect or log in again."
 }
