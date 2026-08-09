@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "acceptanceSchemaVersion": 1,
   "serverName": "Leaf",
-  "status": "offline",
+  "status": "maintenance",
   "mode": "pinggy",
   "loginHost": "",
   "loginPort": 0,
@@ -12,7 +12,7 @@
   "onlineAcceptanceToken": "",
   "clientBuildToken": "",
   "releaseVersion": "",
-  "updatedAt": "2026-08-09T22:59:15.8618909Z",
-  "endpointRevision": 793,
-  "message": "Server offline. Try again later."
+  "updatedAt": "2026-08-09T23:01:46.2441596Z",
+  "endpointRevision": 794,
+  "message": "Maintenance: a new production candidate is being validated and published. Login is temporarily disabled."
 }
