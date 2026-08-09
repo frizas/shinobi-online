@@ -6,7 +6,8 @@ process.env.SITE_ACCESS_SIGNING_KEY = "temporary-test-signing-key-with-at-least-
 const { default: middleware, createSessionToken, verifySessionToken } = await import("../middleware.js");
 
 const onlineManifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
+  acceptanceSchemaVersion: 1,
   serverName: "Leaf",
   status: "online",
   mode: "pinggy",
@@ -15,6 +16,9 @@ const onlineManifest = {
   gameHost: "127.0.0.1",
   gamePort: 7172,
   protocol: 854,
+  onlineAcceptanceToken: "d".repeat(64),
+  clientBuildToken: "e".repeat(64),
+  releaseVersion: "v0.4.39",
   updatedAt: "2026-07-26T12:00:00.1234567Z",
   endpointRevision: 1,
   message: "Leaf is online."
@@ -120,6 +124,34 @@ assert.equal(await publicServerManifest.text(), onlineManifestBytes);
 const publicServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
 assert.equal(publicServerSignature.status, 200);
 assert.equal(await publicServerSignature.text(), serverSignatureBytes);
+
+const maintenanceManifest = {
+  ...onlineManifest,
+  status: "maintenance",
+  loginHost: "",
+  loginPort: 0,
+  gameHost: "",
+  gamePort: 0,
+  onlineAcceptanceToken: "",
+  clientBuildToken: "",
+  releaseVersion: ""
+};
+const maintenanceManifestBytes = `${JSON.stringify(maintenanceManifest, null, 2)}\n`;
+globalThis.fetch = async (url) => new Response(
+  String(url).includes("server.sig") ? serverSignatureBytes : maintenanceManifestBytes,
+  { status: 200, headers: { "content-type": "application/json" } }
+);
+const publicMaintenanceManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
+assert.equal(publicMaintenanceManifest.status, 200);
+assert.equal(await publicMaintenanceManifest.text(), maintenanceManifestBytes);
+
+const legacyManifestBytes = `${JSON.stringify({ ...onlineManifest, schemaVersion: 1 }, null, 2)}\n`;
+globalThis.fetch = async () => new Response(legacyManifestBytes, {
+  status: 200,
+  headers: { "content-type": "application/json" }
+});
+const legacyServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
+assert.equal(legacyServerManifest.status, 503);
 
 const fallbackRequests = [];
 globalThis.fetch = async (url, options) => {

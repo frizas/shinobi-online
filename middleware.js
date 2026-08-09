@@ -203,12 +203,18 @@ function normalizeServerManifest(manifest) {
   const validStatus = ["online", "offline", "maintenance"].includes(manifest && manifest.status);
   const validMode = ["pinggy", "stable"].includes(manifest && manifest.mode);
   const safeHost = (value) =>
-    value === null ||
-    (typeof value === "string" && value.length > 0 && value.length <= 253 && /^[A-Za-z0-9.-]+$/.test(value));
+    typeof value === "string" &&
+    (value === "" || (value.length <= 253 && /^[A-Za-z0-9.-]+$/.test(value)));
   const validPort = (value) => Number.isInteger(value) && value >= 0 && value <= 65535;
+  const safeAcceptanceToken = (value) =>
+    typeof value === "string" && (value === "" || /^[a-f0-9]{64}$/.test(value));
+  const safeReleaseVersion = (value) =>
+    typeof value === "string" &&
+    (value === "" || /^v\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$/.test(value));
 
   if (!manifest ||
-      manifest.schemaVersion !== 1 ||
+      manifest.schemaVersion !== 2 ||
+      manifest.acceptanceSchemaVersion !== 1 ||
       manifest.serverName !== "Leaf" ||
       !validStatus ||
       !validMode ||
@@ -218,6 +224,9 @@ function normalizeServerManifest(manifest) {
       !validPort(manifest.gamePort) ||
       !Number.isInteger(manifest.protocol) ||
       manifest.protocol < 1 ||
+      !safeAcceptanceToken(manifest.onlineAcceptanceToken) ||
+      !safeAcceptanceToken(manifest.clientBuildToken) ||
+      !safeReleaseVersion(manifest.releaseVersion) ||
       typeof manifest.updatedAt !== "string" ||
       !Number.isInteger(manifest.endpointRevision) ||
       manifest.endpointRevision < 0 ||
@@ -227,12 +236,19 @@ function normalizeServerManifest(manifest) {
   }
 
   if (manifest.status === "online" &&
-      (!manifest.loginHost || !manifest.gameHost || manifest.loginPort < 1 || manifest.gamePort < 1)) {
-    throw new Error("Online server manifest has no usable endpoint");
+      (!manifest.loginHost || !manifest.gameHost || manifest.loginPort < 1 || manifest.gamePort < 1 ||
+       !manifest.onlineAcceptanceToken || !manifest.clientBuildToken || !manifest.releaseVersion)) {
+    throw new Error("Online server manifest has no usable accepted endpoint");
+  }
+  if (manifest.status !== "online" &&
+      (manifest.loginHost || manifest.gameHost || manifest.loginPort !== 0 || manifest.gamePort !== 0 ||
+       manifest.onlineAcceptanceToken || manifest.clientBuildToken || manifest.releaseVersion)) {
+    throw new Error("Non-online server manifest retains stale acceptance identity");
   }
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    acceptanceSchemaVersion: 1,
     serverName: "Leaf",
     status: manifest.status,
     mode: manifest.mode,
@@ -241,6 +257,9 @@ function normalizeServerManifest(manifest) {
     gameHost: manifest.gameHost,
     gamePort: manifest.gamePort,
     protocol: manifest.protocol,
+    onlineAcceptanceToken: manifest.onlineAcceptanceToken,
+    clientBuildToken: manifest.clientBuildToken,
+    releaseVersion: manifest.releaseVersion,
     updatedAt: manifest.updatedAt,
     endpointRevision: manifest.endpointRevision,
     message: manifest.message
