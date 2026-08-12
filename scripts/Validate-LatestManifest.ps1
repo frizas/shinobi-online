@@ -56,8 +56,8 @@ try {
     $provider.Dispose()
 }
 
-if ($manifest.schemaVersion -notin @(3, 4)) {
-    throw 'schemaVersion must be 3 or 4.'
+if ($manifest.schemaVersion -notin @(3, 4, 5)) {
+    throw 'schemaVersion must be 3, 4, or 5.'
 }
 
 if ($manifest.game -ne 'Shinobi Online') {
@@ -82,6 +82,12 @@ $expectedTokenKind = if ($manifest.schemaVersion -eq 3) {
     'shinobiContentIndexSha256'
 } else {
     'runtimeIdentitySha256'
+}
+
+if ($manifest.schemaVersion -eq 5) {
+    if ($manifest.sourceTag -notmatch '^shinobi-source/v5/[^/]+/[a-f0-9]{16}-[a-f0-9]{16}$') {
+        throw 'schemaVersion 5 requires a valid sourceTag bound to the private source identity.'
+    }
 }
 
 if ($manifest.status -notin @('pending-release', 'available', 'withdrawn')) {
@@ -172,6 +178,11 @@ function Assert-ClientBuildEntry {
     if ([string]::IsNullOrWhiteSpace($Entry.publishedAt)) {
         throw "$Name.publishedAt is required."
     }
+
+    if ($manifest.schemaVersion -eq 5 -and
+        $Entry.sourceTag -cne $manifest.sourceTag) {
+        throw "$Name.sourceTag must match manifest.sourceTag for schemaVersion 5."
+    }
 }
 
 function Assert-RuntimePackage {
@@ -193,7 +204,7 @@ if ($manifest.status -eq 'available') {
     }
 
     Assert-ReleaseArtifact -Artifact $manifest.installer -Name 'installer'
-    if ($manifest.schemaVersion -eq 4) {
+    if ($manifest.schemaVersion -in @(4, 5)) {
         if (!$manifest.contentPack -or
             $manifest.contentPack.format -cne 'ShinobiContentPack/1' -or
             $manifest.contentPack.version -cne $manifest.version -or
@@ -232,9 +243,9 @@ if ($manifest.status -eq 'available') {
         throw 'distribution must identify v0.2 with the raw runtime updater disabled.'
     }
 
-    $expectedUpdateMode = if ($manifest.schemaVersion -eq 4) { 'content-or-installer' } else { 'installer' }
+    $expectedUpdateMode = if ($manifest.schemaVersion -in @(4, 5)) { 'content-or-installer' } else { 'installer' }
     if ($manifest.clientBuild.updateMode -ne $expectedUpdateMode -or
-        ($manifest.schemaVersion -eq 4 -and !$manifest.distribution.contentUpdaterEnabled)) {
+        ($manifest.schemaVersion -in @(4, 5) -and !$manifest.distribution.contentUpdaterEnabled)) {
         throw "clientBuild.updateMode must be $expectedUpdateMode and match distribution content-updater policy."
     }
 

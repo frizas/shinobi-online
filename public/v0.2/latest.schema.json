@@ -19,7 +19,11 @@
     "message"
   ],
   "properties": {
-    "schemaVersion": { "enum": [3, 4] },
+    "schemaVersion": { "enum": [3, 4, 5] },
+    "sourceTag": {
+      "type": "string",
+      "pattern": "^shinobi-source/v5/[^/]+/[a-f0-9]{16}-[a-f0-9]{16}$"
+    },
     "game": { "const": "Shinobi Online" },
     "channel": { "enum": ["production", "staging"] },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$" },
@@ -102,6 +106,10 @@
       "properties": {
         "version": { "type": "string" },
         "token": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sourceTag": {
+          "type": "string",
+          "pattern": "^shinobi-source/v5/[^/]+/[a-f0-9]{16}-[a-f0-9]{16}$"
+        },
         "tokenKind": {
           "enum": [
             "runtimeManifestSha256",
@@ -115,6 +123,25 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": { "schemaVersion": { "const": 5 } },
+        "required": ["schemaVersion"]
+      },
+      "then": {
+        "required": ["sourceTag"],
+        "properties": {
+          "clientBuild": {
+            "properties": {
+              "current": { "required": ["sourceTag"] },
+              "accepted": {
+                "items": { "required": ["sourceTag"] }
+              }
+            }
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {
