@@ -12,7 +12,7 @@
   "onlineAcceptanceToken": "",
   "clientBuildToken": "",
   "releaseVersion": "",
-  "updatedAt": "2026-08-21T07:36:36.5028350Z",
-  "endpointRevision": 916,
-  "message": "Maintenance: a validated production candidate is being cut over. Login is temporarily disabled."
+  "updatedAt": "2026-08-21T07:39:48.7702081Z",
+  "endpointRevision": 917,
+  "message": "Maintenance: production acceptance checks are in progress. Login is temporarily disabled."
 }
