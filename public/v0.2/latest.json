@@ -5,7 +5,7 @@
   "channel": "production",
   "version": "0.4.54",
   "status": "available",
-  "publishedAt": "2026-08-21T06:27:01.4650633Z",
+  "publishedAt": "2026-08-21T06:32:48.7126498Z",
   "installer": {
     "fileName": "ShinobiOnlineSetup-0.4.54.exe",
     "url": "https://github.com/frizas/shinobi-online/releases/download/v0.4.54/ShinobiOnlineSetup-0.4.54.exe",
@@ -53,7 +53,7 @@
       "token": "0c543fd60112461d676d9b6ee93f24f7e5b49f409960fc40acbaff7937df8478",
       "tokenKind": "shinobiContentIndexSha256",
       "sourceTag": "shinobi-source/v5/v0.4.54/ae631bcfd30688b8-3e483a187c29f7ed",
-      "publishedAt": "2026-08-21T06:27:01.4650633Z"
+      "publishedAt": "2026-08-21T06:32:48.7126498Z"
     },
     "accepted": [
       {
@@ -61,7 +61,7 @@
         "token": "0c543fd60112461d676d9b6ee93f24f7e5b49f409960fc40acbaff7937df8478",
         "tokenKind": "shinobiContentIndexSha256",
         "sourceTag": "shinobi-source/v5/v0.4.54/ae631bcfd30688b8-3e483a187c29f7ed",
-        "publishedAt": "2026-08-21T06:27:01.4650633Z"
+        "publishedAt": "2026-08-21T06:32:48.7126498Z"
       }
     ],
     "minimumAcceptedVersion": "0.4.54",
