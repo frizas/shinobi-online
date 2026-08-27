@@ -12,7 +12,7 @@
   "onlineAcceptanceToken": "",
   "clientBuildToken": "",
   "releaseVersion": "",
-  "updatedAt": "2026-08-27T16:47:44.9704079Z",
-  "endpointRevision": 969,
-  "message": "Maintenance: production acceptance is not currently valid. Login is disabled."
+  "updatedAt": "2026-08-27T16:48:07.9120417Z",
+  "endpointRevision": 970,
+  "message": "Maintenance: production acceptance checks are in progress. Login is temporarily disabled."
 }
