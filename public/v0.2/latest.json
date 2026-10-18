@@ -1,16 +1,16 @@
 {
   "schemaVersion": 5,
-  "sourceTag": "shinobi-source/v5/v0.4.68/6616e5e2046cb8c1-2ee30c53e7065e75",
+  "sourceTag": "shinobi-source/v5/v0.4.68/d4ce5dbc1f960a38-84df31bd3bfd9869",
   "game": "Shinobi Online",
   "channel": "production",
   "version": "0.4.68",
   "status": "available",
-  "publishedAt": "2026-10-18T15:28:18.1123159Z",
+  "publishedAt": "2026-10-18T14:27:01.1872601Z",
   "installer": {
     "fileName": "ShinobiOnlineSetup-0.4.68.exe",
     "url": "https://github.com/frizas/shinobi-online/releases/download/v0.4.68/ShinobiOnlineSetup-0.4.68.exe",
-    "sha256": "ff850f0cee595f269eec676ffa501d78a3002a4bfc718ccf405331b6e452e0e2",
-    "sizeBytes": 90579480
+    "sha256": "c081ea7b37fb1915f2ffeb7f9485d61df3f63a2d32f47f26c25ba1215e8e7abc",
+    "sizeBytes": 90578944
   },
   "contentPack": {
     "format": "ShinobiContentPack/1",
@@ -52,16 +52,16 @@
       "version": "0.4.68",
       "token": "7b870836eed7dc858106fee13dd97ede28a7d0808f7c1252eaed1c5e8f984f3f",
       "tokenKind": "shinobiContentIndexSha256",
-      "sourceTag": "shinobi-source/v5/v0.4.68/6616e5e2046cb8c1-2ee30c53e7065e75",
-      "publishedAt": "2026-10-18T15:28:18.1123159Z"
+      "sourceTag": "shinobi-source/v5/v0.4.68/d4ce5dbc1f960a38-84df31bd3bfd9869",
+      "publishedAt": "2026-10-18T14:27:01.1872601Z"
     },
     "accepted": [
       {
         "version": "0.4.68",
         "token": "7b870836eed7dc858106fee13dd97ede28a7d0808f7c1252eaed1c5e8f984f3f",
         "tokenKind": "shinobiContentIndexSha256",
-        "sourceTag": "shinobi-source/v5/v0.4.68/6616e5e2046cb8c1-2ee30c53e7065e75",
-        "publishedAt": "2026-10-18T15:28:18.1123159Z"
+        "sourceTag": "shinobi-source/v5/v0.4.68/d4ce5dbc1f960a38-84df31bd3bfd9869",
+        "publishedAt": "2026-10-18T14:27:01.1872601Z"
       }
     ],
     "minimumAcceptedVersion": "0.4.68",
