@@ -12,7 +12,7 @@
   "onlineAcceptanceToken": "",
   "clientBuildToken": "",
   "releaseVersion": "",
-  "updatedAt": "2026-10-18T19:36:41.4780354Z",
-  "endpointRevision": 1046,
-  "message": "Maintenance: a validated production candidate is being cut over. Login is temporarily disabled."
+  "updatedAt": "2026-10-18T19:43:13.4509669Z",
+  "endpointRevision": 1047,
+  "message": "Maintenance: public play is closed. The operator will manage server status manually."
 }
