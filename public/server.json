@@ -12,7 +12,7 @@
   "onlineAcceptanceToken": "",
   "clientBuildToken": "",
   "releaseVersion": "",
-  "updatedAt": "2026-10-18T19:43:13.4509669Z",
-  "endpointRevision": 1047,
-  "message": "Maintenance: public play is closed. The operator will manage server status manually."
+  "updatedAt": "2026-10-19T00:48:43.0332408Z",
+  "endpointRevision": 1048,
+  "message": "Maintenance: production acceptance checks are in progress. Login is temporarily disabled."
 }
