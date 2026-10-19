@@ -5,6 +5,11 @@
   "installCommand": null,
   "outputDirectory": ".",
   "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ':(exclude)public/server.json' ':(exclude)public/server.sig'",
+  "functions": {
+    "api/website-login.js": {
+      "maxDuration": 15
+    }
+  },
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [

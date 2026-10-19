@@ -183,6 +183,28 @@ h1 {
   margin-bottom: 16px;
 }
 
+.landing-actions {
+  display: grid;
+  width: min(420px, 100%);
+  gap: 15px;
+  justify-items: start;
+}
+
+.landing-actions .button {
+  width: 100%;
+}
+
+.landing-login {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration-color: rgba(224, 159, 73, 0.48);
+  text-underline-offset: 4px;
+}
+
+.landing-login:hover {
+  color: var(--ink);
+}
+
 .download-panel .download-actions .button {
   width: 100%;
   margin-bottom: 0;

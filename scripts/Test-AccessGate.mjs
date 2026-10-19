@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
-process.env.SITE_ACCESS_KEY = "temporary-test-access-key-24-plus";
 process.env.SITE_ACCESS_SIGNING_KEY = "temporary-test-signing-key-with-at-least-48-bytes";
+process.env.SITE_ACCESS_KEY = "legacy-shared-key-is-ignored";
 
-const { default: middleware, createSessionToken, verifySessionToken } = await import("../middleware.js");
+const { default: middleware, verifySessionToken } = await import("../middleware.js");
 
 const onlineManifest = {
   schemaVersion: 2,
@@ -18,7 +19,7 @@ const onlineManifest = {
   protocol: 854,
   onlineAcceptanceToken: "d".repeat(64),
   clientBuildToken: "e".repeat(64),
-  releaseVersion: "v0.4.39",
+  releaseVersion: "v0.4.69",
   updatedAt: "2026-07-26T12:00:00.1234567Z",
   endpointRevision: 1,
   message: "Leaf is online."
@@ -32,156 +33,114 @@ const serverSignatureEnvelope = {
   signature: "c".repeat(512)
 };
 const serverSignatureBytes = `${JSON.stringify(serverSignatureEnvelope, null, 2)}\n`;
+
 globalThis.fetch = async (url) => new Response(
   String(url).includes("server.sig") ? serverSignatureBytes : onlineManifestBytes,
-  {
-    status: 200,
-    headers: { "content-type": "application/json" }
-  }
+  { status: 200, headers: { "content-type": "application/json" } }
 );
 
-const rootRequest = new Request("https://shinobionline.vercel.app/");
-const loginResponse = await middleware(rootRequest);
-assert.equal(loginResponse.status, 401);
-assert.doesNotMatch(await loginResponse.text(), /temporary-test-access-key-24-plus/);
+const root = await middleware(new Request("https://shinobionline.vercel.app/"));
+assert.equal(root.headers.get("x-middleware-next"), "1", "the static landing page stays public");
+const landingHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
+assert.match(landingHtml, /href="\/download"/);
+assert.doesNotMatch(landingHtml, /github\.com\/frizas\/shinobi-online\/releases|latest\.json|server\.json|app\.js/);
 
-const wrongRequest = new Request("https://shinobionline.vercel.app/", {
+const guestDownload = await middleware(new Request("https://shinobionline.vercel.app/download"));
+assert.equal(guestDownload.status, 303);
+assert.equal(guestDownload.headers.get("location"), "https://shinobionline.vercel.app/login?next=%2Fdownload");
+const guestDownloadFile = await middleware(new Request("https://shinobionline.vercel.app/download.html"));
+assert.equal(guestDownloadFile.status, 303, "the backing download page is gated too");
+const guestAppScript = await middleware(new Request("https://shinobionline.vercel.app/app.js"));
+assert.equal(guestAppScript.status, 303, "download details are not served to a guest");
+
+const loginPage = await middleware(new Request("https://shinobionline.vercel.app/login?next=%2Fdownload"));
+assert.equal(loginPage.status, 200);
+const loginHtml = await loginPage.text();
+assert.match(loginHtml, /Game username/);
+assert.match(loginHtml, /current-password/);
+assert.match(loginHtml, /same username and password you use to log in to the game/i);
+assert.doesNotMatch(loginHtml, /Access key|legacy-shared-key-is-ignored/);
+
+let lastLoginForward;
+globalThis.fetch = async (url, options) => {
+  lastLoginForward = { url: String(url), options };
+  return new Response('{"authenticated":false}', { status: 401 });
+};
+const rejectedLogin = await middleware(new Request("https://shinobionline.vercel.app/login", {
   method: "POST",
   headers: {
     "content-type": "application/x-www-form-urlencoded",
+    origin: "https://shinobionline.vercel.app",
     "x-vercel-forwarded-for": "192.0.2.10"
   },
-  body: "key=wrong"
-});
-assert.equal((await middleware(wrongRequest)).status, 404);
+  body: "username=shinobiuser&password=incorrect"
+}));
+assert.equal(rejectedLogin.status, 200);
+assert.match(await rejectedLogin.text(), /Login failed/);
+assert.equal(lastLoginForward.url, "https://shinobionline.vercel.app/api/website-login");
+assert.equal(lastLoginForward.options.method, "POST");
+assert.equal(JSON.parse(lastLoginForward.options.body).username, "shinobiuser");
+assert.ok(lastLoginForward.options.headers["x-shinobi-login-proof"]);
 
-const correctRequest = new Request("https://shinobionline.vercel.app/", {
+globalThis.fetch = async () => new Response('{"authenticated":true}', { status: 200 });
+const acceptedLogin = await middleware(new Request("https://shinobionline.vercel.app/login", {
   method: "POST",
   headers: {
     "content-type": "application/x-www-form-urlencoded",
+    origin: "https://shinobionline.vercel.app",
     "x-vercel-forwarded-for": "192.0.2.11"
   },
-  body: "key=temporary-test-access-key-24-plus"
-});
-const correctResponse = await middleware(correctRequest);
-assert.equal(correctResponse.status, 303);
-assert.match(correctResponse.headers.get("set-cookie"), /^__Host-shinobi_site_access=/);
-
-const sessionToken = await createSessionToken(process.env.SITE_ACCESS_SIGNING_KEY, 1_800_000_000);
-assert.equal(await verifySessionToken(sessionToken, process.env.SITE_ACCESS_SIGNING_KEY, 1_800_000_001), true);
-assert.equal(await verifySessionToken(sessionToken, "different-signing-key-with-at-least-48-bytes", 1_800_000_001), false);
-
-const oversizedRequest = new Request("https://shinobionline.vercel.app/", {
-  method: "POST",
-  headers: {
-    "content-type": "application/x-www-form-urlencoded",
-    "content-length": "513"
-  },
-  body: "key=wrong"
-});
-assert.equal((await middleware(oversizedRequest)).status, 404);
-
-const jsonRequest = new Request("https://shinobionline.vercel.app/", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ key: process.env.SITE_ACCESS_KEY })
-});
-assert.equal((await middleware(jsonRequest)).status, 404);
-
-for (let attempt = 0; attempt < 8; attempt += 1) {
-  const response = await middleware(new Request("https://shinobionline.vercel.app/", {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      "x-vercel-forwarded-for": "192.0.2.12"
-    },
-    body: "key=wrong"
-  }));
-  assert.equal(response.status, 404);
-}
-const throttledCorrectResponse = await middleware(new Request("https://shinobionline.vercel.app/", {
-  method: "POST",
-  headers: {
-    "content-type": "application/x-www-form-urlencoded",
-    "x-vercel-forwarded-for": "192.0.2.12"
-  },
-  body: "key=temporary-test-access-key-24-plus"
+  body: "username=shinobiuser&password=correct-horse&returnTo=https%3A%2F%2Fevil.example"
 }));
-assert.equal(throttledCorrectResponse.status, 404);
+assert.equal(acceptedLogin.status, 303);
+assert.equal(acceptedLogin.headers.get("location"), "/download", "return path is fixed to the gated download page");
+const cookie = acceptedLogin.headers.get("set-cookie");
+assert.match(cookie, /^__Host-shinobi_site_access=.*; Path=\/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200$/);
+const sessionToken = cookie.split(";")[0].split("=")[1];
+assert.equal(await verifySessionToken(sessionToken, process.env.SITE_ACCESS_SIGNING_KEY), true);
 
-const publicManifest = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.json"));
-assert.equal(publicManifest.headers.get("x-middleware-next"), "1");
-const publicSignature = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.sig"));
-assert.equal(publicSignature.headers.get("x-middleware-next"), "1");
-const manifestPost = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.json", {
-  method: "POST"
+const permittedDownload = await middleware(new Request("https://shinobionline.vercel.app/download", {
+  headers: { cookie: `__Host-shinobi_site_access=${sessionToken}` }
 }));
-assert.equal(manifestPost.status, 404);
+assert.equal(permittedDownload.headers.get("x-middleware-next"), "1");
+assert.equal(permittedDownload.headers.get("cache-control"), "private, no-store");
 
+const logout = await middleware(new Request("https://shinobionline.vercel.app/logout"));
+assert.equal(logout.status, 303);
+assert.equal(logout.headers.get("location"), "/");
+assert.match(logout.headers.get("set-cookie"), /Max-Age=0/);
+
+const publicLatestManifest = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.json"));
+assert.equal(publicLatestManifest.headers.get("x-middleware-next"), "1");
+globalThis.fetch = async (url) => new Response(
+  String(url).includes("server.sig") ? serverSignatureBytes : onlineManifestBytes,
+  { status: 200, headers: { "content-type": "application/json" } }
+);
 const publicServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
 assert.equal(publicServerManifest.status, 200);
 assert.equal(await publicServerManifest.text(), onlineManifestBytes);
-const publicServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
-assert.equal(publicServerSignature.status, 200);
-assert.equal(await publicServerSignature.text(), serverSignatureBytes);
 
-const maintenanceManifest = {
-  ...onlineManifest,
-  status: "maintenance",
-  loginHost: "",
-  loginPort: 0,
-  gameHost: "",
-  gamePort: 0,
-  onlineAcceptanceToken: "",
-  clientBuildToken: "",
-  releaseVersion: ""
-};
-const maintenanceManifestBytes = `${JSON.stringify(maintenanceManifest, null, 2)}\n`;
-globalThis.fetch = async (url) => new Response(
-  String(url).includes("server.sig") ? serverSignatureBytes : maintenanceManifestBytes,
-  { status: 200, headers: { "content-type": "application/json" } }
-);
-const publicMaintenanceManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
-assert.equal(publicMaintenanceManifest.status, 200);
-assert.equal(await publicMaintenanceManifest.text(), maintenanceManifestBytes);
+globalThis.fetch = async () => new Response('{"authenticated":false}', { status: 401 });
+for (let attempt = 0; attempt < 8; attempt += 1) {
+  await middleware(new Request("https://shinobionline.vercel.app/login", {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+      origin: "https://shinobionline.vercel.app",
+      "x-vercel-forwarded-for": "192.0.2.12"
+    },
+    body: "username=shinobiuser&password=incorrect"
+  }));
+}
+const throttledLogin = await middleware(new Request("https://shinobionline.vercel.app/login", {
+  method: "POST",
+  headers: {
+    "content-type": "application/x-www-form-urlencoded",
+    origin: "https://shinobionline.vercel.app",
+    "x-vercel-forwarded-for": "192.0.2.12"
+  },
+  body: "username=shinobiuser&password=correct-horse"
+}));
+assert.match(await throttledLogin.text(), /Login failed/);
 
-const legacyManifestBytes = `${JSON.stringify({ ...onlineManifest, schemaVersion: 1 }, null, 2)}\n`;
-globalThis.fetch = async () => new Response(legacyManifestBytes, {
-  status: 200,
-  headers: { "content-type": "application/json" }
-});
-const legacyServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
-assert.equal(legacyServerManifest.status, 503);
-
-const fallbackRequests = [];
-globalThis.fetch = async (url, options) => {
-  fallbackRequests.push({ url: String(url), accept: options.headers.accept });
-  if (String(url).startsWith("https://raw.githubusercontent.com/")) {
-    return new Response("unavailable", { status: 503 });
-  }
-  return new Response(String(url).includes("server.sig") ? serverSignatureBytes : onlineManifestBytes, {
-    status: 200,
-    headers: { "content-type": "application/json" }
-  });
-};
-const fallbackServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
-assert.equal(fallbackServerManifest.status, 200);
-assert.equal(await fallbackServerManifest.text(), onlineManifestBytes);
-assert.equal(fallbackRequests.length, 2);
-assert.match(fallbackRequests[1].url, /^https:\/\/api\.github\.com\/repos\/frizas\/shinobi-online\/contents\/public\/server\.json/);
-assert.equal(fallbackRequests[1].accept, "application/vnd.github.raw");
-const fallbackServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
-assert.equal(fallbackServerSignature.status, 200);
-assert.equal(await fallbackServerSignature.text(), serverSignatureBytes);
-assert.equal(fallbackRequests.length, 4);
-assert.match(fallbackRequests[3].url, /^https:\/\/api\.github\.com\/repos\/frizas\/shinobi-online\/contents\/public\/server\.sig/);
-
-globalThis.fetch = async () => {
-  throw new Error("upstream unavailable");
-};
-const unavailableServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
-assert.equal(unavailableServerManifest.status, 503);
-const unavailableServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
-assert.equal(unavailableServerSignature.status, 503);
-
-console.log("Access gate OK: signed session, generic failures, bounded throttle, signed v0.2 and exact server metadata public.");
+console.log("Website access gate OK: public landing, protected download view, game-account session, logout, public launcher manifests, and bounded login attempts.");

@@ -1,12 +1,12 @@
 import { next } from "@vercel/functions";
+import { createSessionToken, verifySessionToken, createLoginRequestProof, SESSION_TTL_SECONDS } from "./session.js";
+export { createSessionToken, verifySessionToken } from "./session.js";
 
 const COOKIE_NAME = "__Host-shinobi_site_access";
-const SESSION_SECONDS = 12 * 60 * 60;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_BLOCK_MS = 30 * 60 * 1000;
 const LOGIN_FAILURE_LIMIT = 8;
 const LOGIN_TRACKER_LIMIT = 2048;
-const encoder = new TextEncoder();
 const loginFailures = new Map();
 
 export const config = {
@@ -14,60 +14,11 @@ export const config = {
 };
 
 function getSecrets() {
-  const accessKey = process.env.SITE_ACCESS_KEY || process.env["SITE_ACCESS_" + "PASSWORD"] || "";
   const signingKey = process.env.SITE_ACCESS_SIGNING_KEY || "";
-  if (accessKey.length < 24 || accessKey.length > 128 || signingKey.length < 48) {
+  if (signingKey.length < 48) {
     return null;
   }
-  return { accessKey, signingKey };
-}
-
-function constantTimeEqual(left, right) {
-  const leftText = String(left);
-  const rightText = String(right);
-  const length = Math.max(leftText.length, rightText.length);
-  let mismatch = leftText.length ^ rightText.length;
-  for (let index = 0; index < length; index += 1) {
-    mismatch |= (leftText.charCodeAt(index) || 0) ^ (rightText.charCodeAt(index) || 0);
-  }
-  return mismatch === 0;
-}
-
-function toBase64Url(bytes) {
-  let binary = "";
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
-  }
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-async function sign(value, signingKey) {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(signingKey),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(value));
-  return toBase64Url(new Uint8Array(signature));
-}
-
-export async function createSessionToken(signingKey, nowSeconds = Math.floor(Date.now() / 1000)) {
-  const expiresAt = nowSeconds + SESSION_SECONDS;
-  return `${expiresAt}.${await sign(String(expiresAt), signingKey)}`;
-}
-
-export async function verifySessionToken(token, signingKey, nowSeconds = Math.floor(Date.now() / 1000)) {
-  const match = /^(\d{10})\.([A-Za-z0-9_-]{43})$/.exec(token || "");
-  if (!match) {
-    return false;
-  }
-  const expiresAt = Number(match[1]);
-  if (expiresAt <= nowSeconds || expiresAt > nowSeconds + SESSION_SECONDS) {
-    return false;
-  }
-  return constantTimeEqual(match[2], await sign(match[1], signingKey));
+  return { signingKey };
 }
 
 function getCookie(request, name) {
@@ -160,33 +111,62 @@ function notFound() {
   });
 }
 
-function loginPage() {
+function safeReturnPath(value) {
+  return value === "/download" ? value : "/download";
+}
+
+function loginPage(returnPath = "/download", errorKind = "") {
+  const errorMessage = errorKind === "unavailable"
+    ? "Game-account login is temporarily unavailable. Please try again while Shinobi Online is online."
+    : errorKind
+      ? "Login failed. Check your username and password, then try again."
+      : "";
   return new Response(`<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <title>Access required</title>
+  <title>Log in · Shinobi Online</title>
   <style>
-    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #05080a; color: #f5f7f8; }
-    body { min-height: 100vh; margin: 0; display: grid; place-items: center; }
-    form { width: min(24rem, calc(100% - 3rem)); display: grid; gap: 1rem; }
-    label { font-size: .82rem; letter-spacing: .12em; text-transform: uppercase; color: #aab2b6; }
-    input, button { box-sizing: border-box; width: 100%; border: 1px solid #394247; border-radius: .35rem; padding: .9rem 1rem; font: inherit; }
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #05080a; color: #f7f1df; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; background: radial-gradient(ellipse at 50% 35%, #17211e, #05080a 68%); }
+    main { width: min(28rem, 100%); border: 1px solid rgba(247,241,223,.17); border-left: 3px solid #e09f49; border-radius: 8px; background: rgba(8,16,18,.92); padding: clamp(24px, 6vw, 42px); box-shadow: 0 24px 80px rgba(0,0,0,.45); }
+    .eyebrow { margin: 0 0 10px; color: #e09f49; font-size: .75rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { margin: 0 0 10px; font-size: clamp(1.7rem, 5vw, 2.1rem); line-height: 1.1; }
+    .hint { margin: 0 0 24px; color: #b7c0ba; line-height: 1.5; }
+    form { display: grid; gap: 15px; }
+    label { display: grid; gap: 7px; color: #c8cec4; font-size: .82rem; font-weight: 700; }
+    input, button { box-sizing: border-box; width: 100%; min-height: 48px; border: 1px solid #394247; border-radius: .35rem; padding: .75rem .9rem; font: inherit; }
     input { background: #0b1013; color: inherit; }
-    button { cursor: pointer; border-color: #9b2020; background: #7a1717; color: white; font-weight: 700; }
+    input:focus { outline: 2px solid #e09f49; outline-offset: 2px; }
+    button { margin-top: 4px; cursor: pointer; border-color: transparent; background: linear-gradient(180deg, #f0bd62, #e09f49); color: #15100a; font-weight: 800; }
+    button:hover { background: #f0bd62; }
+    .error { margin: 0 0 16px; border-left: 2px solid #d77a67; padding: 8px 10px; color: #f1aa98; }
+    .back { display: inline-block; margin-top: 20px; color: #b7c0ba; font-size: .9rem; text-underline-offset: 4px; }
   </style>
 </head>
 <body>
-  <form method="post" action="/" autocomplete="off">
-    <label for="key">Access key</label>
-    <input id="key" name="key" type="password" required autofocus autocomplete="current-password" maxlength="256">
-    <button type="submit">Enter</button>
-  </form>
+  <main>
+    <p class="eyebrow">Shinobi Online</p>
+    <h1>Log in to continue</h1>
+    <p class="hint">Use the same username and password you use to log in to the game.</p>
+    ${errorMessage ? `<p class="error" role="alert">${errorMessage}</p>` : ''}
+    <form method="post" action="/login" autocomplete="on">
+      <input type="hidden" name="returnTo" value="${safeReturnPath(returnPath)}">
+      <label for="username">Game username
+        <input id="username" name="username" type="text" required autofocus autocomplete="username" minlength="3" maxlength="25" autocapitalize="none" spellcheck="false">
+      </label>
+      <label for="password">Password
+        <input id="password" name="password" type="password" required autocomplete="current-password" minlength="4" maxlength="64">
+      </label>
+      <button type="submit">Log in</button>
+    </form>
+    <a class="back" href="/">Back to Shinobi Online</a>
+  </main>
 </body>
 </html>`, {
-    status: 401,
+    status: 200,
     headers: securityHeaders("text/html; charset=utf-8")
   });
 }
@@ -347,26 +327,42 @@ async function serverMetadataResponse(fileName) {
 
 export default async function middleware(request) {
   const url = new URL(request.url);
+  const pathname = url.pathname;
 
-  // Launchers cannot complete the authenticated update flow with a browser
-  // session cookie. The signed release manifest and its detached signature are
-  // intentionally public metadata; the runtime still verifies that signature
-  // before it trusts any release fields.
-  if (
-    request.method === "GET" &&
-    (url.pathname === "/public/v0.2/latest.json" ||
-      url.pathname === "/public/v0.2/latest.sig")
-  ) {
+  // Player launchers require these signed manifests before a browser session
+  // exists. Their signatures remain the authority for clients that consume them.
+  if (request.method === "GET" &&
+      (pathname === "/public/v0.2/latest.json" || pathname === "/public/v0.2/latest.sig")) {
     return next();
   }
 
-  // Signed endpoint discovery stays public, but is fetched server-side so the
-  // client never follows a cross-origin redirect that its CSP would reject.
-  if (
-    request.method === "GET" &&
-    (url.pathname === "/public/server.json" || url.pathname === "/public/server.sig")
-  ) {
-    return serverMetadataResponse(url.pathname.endsWith(".sig") ? "server.sig" : "server.json");
+  if (request.method === "GET" &&
+      (pathname === "/public/server.json" || pathname === "/public/server.sig")) {
+    return serverMetadataResponse(pathname.endsWith(".sig") ? "server.sig" : "server.json");
+  }
+
+  // Public static landing assets do not include live release/download details.
+  if (request.method === "GET" &&
+      (pathname === "/" || pathname === "/styles.css" || pathname === "/favicon.ico" ||
+       pathname === "/site.webmanifest" || pathname.startsWith("/assets/"))) {
+    return next();
+  }
+
+  // The Node function validates credentials against the running game's login
+  // service. The middleware owns throttling and session issuance.
+  if (pathname === "/api/website-login" && request.method === "POST") {
+    return next();
+  }
+
+  if (pathname === "/logout" && request.method === "GET") {
+    return new Response(null, {
+      status: 303,
+      headers: {
+        ...securityHeaders("text/plain; charset=utf-8"),
+        "location": "/",
+        "set-cookie": `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`
+      }
+    });
   }
 
   const secrets = getSecrets();
@@ -375,42 +371,87 @@ export default async function middleware(request) {
   }
 
   const token = getCookie(request, COOKIE_NAME);
-  if (await verifySessionToken(token, secrets.signingKey)) {
-    return next({
-      headers: {
-        "cache-control": "private, no-store",
-        "vary": "Cookie"
-      }
-    });
+  const authenticated = await verifySessionToken(token, secrets.signingKey);
+
+  if (pathname === "/login" && request.method === "GET") {
+    if (authenticated) {
+      return Response.redirect(new URL("/download", request.url), 303);
+    }
+    return loginPage(safeReturnPath(url.searchParams.get("next")));
   }
 
-  if (url.pathname === "/" && request.method === "GET") {
-    return loginPage();
-  }
-
-  if (url.pathname === "/" && request.method === "POST") {
-    if (isLoginBlocked(request)) {
+  if (pathname === "/login" && request.method === "POST") {
+    const origin = request.headers.get("origin") || "";
+    try {
+      if (new URL(origin).origin !== url.origin) return notFound();
+    } catch {
       return notFound();
+    }
+    if (isLoginBlocked(request)) {
+      return loginPage("/download", true);
+    }
+    const clientAddress = getClientAddress(request);
+    if (!clientAddress) {
+      return new Response(loginPage("/download", "unavailable").body, {
+        status: 503,
+        headers: securityHeaders("text/html; charset=utf-8")
+      });
     }
 
     const contentType = request.headers.get("content-type") || "";
     const contentLength = Number(request.headers.get("content-length") || "0");
     if (!contentType.toLowerCase().startsWith("application/x-www-form-urlencoded") ||
-        !Number.isFinite(contentLength) ||
-        contentLength > 512) {
+        !Number.isFinite(contentLength) || contentLength > 1024) {
       return notFound();
     }
 
-    let submittedKey = "";
+    let username = "";
+    let password = "";
+    let returnTo = "/download";
     try {
       const form = await request.formData();
-      submittedKey = String(form.get("key") || "");
+      username = String(form.get("username") || "").trim();
+      password = String(form.get("password") || "");
+      returnTo = safeReturnPath(String(form.get("returnTo") || ""));
     } catch {
       return notFound();
     }
-    if (submittedKey.length > 128 || !constantTimeEqual(submittedKey, secrets.accessKey)) {
+
+    if (!/^[A-Za-z0-9]{3,25}$/.test(username) || password.length < 4 || password.length > 64) {
       recordLoginFailure(request);
-      return notFound();
+      return loginPage(returnTo, true);
+    }
+
+    const timestamp = String(Math.floor(Date.now() / 1000));
+    const proof = await createLoginRequestProof(secrets.signingKey, timestamp, clientAddress, username, password);
+    let verification;
+    try {
+      verification = await fetch(new URL("/api/website-login", request.url), {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-shinobi-login-time": timestamp,
+          "x-shinobi-login-ip": clientAddress,
+          "x-shinobi-login-proof": proof
+        },
+        body: JSON.stringify({ username, password })
+      });
+    } catch {
+      return new Response(loginPage(returnTo, "unavailable").body, {
+        status: 503,
+        headers: securityHeaders("text/html; charset=utf-8")
+      });
+    }
+
+    if (verification.status === 401) {
+      recordLoginFailure(request);
+      return loginPage(returnTo, true);
+    }
+    if (!verification.ok) {
+      return new Response(loginPage(returnTo, "unavailable").body, {
+        status: 503,
+        headers: securityHeaders("text/html; charset=utf-8")
+      });
     }
 
     clearLoginFailures(request);
@@ -418,9 +459,22 @@ export default async function middleware(request) {
     return new Response(null, {
       status: 303,
       headers: {
+        ...securityHeaders("text/plain; charset=utf-8"),
+        "location": returnTo,
+        "set-cookie": `${COOKIE_NAME}=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL_SECONDS}`
+      }
+    });
+  }
+
+  if ((pathname === "/download" || pathname === "/download.html" || pathname === "/app.js") &&
+      request.method === "GET") {
+    if (!authenticated) {
+      return Response.redirect(new URL("/login?next=%2Fdownload", request.url), 303);
+    }
+    return next({
+      headers: {
         "cache-control": "private, no-store",
-        "location": "/",
-        "set-cookie": `${COOKIE_NAME}=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_SECONDS}`
+        "vary": "Cookie"
       }
     });
   }
