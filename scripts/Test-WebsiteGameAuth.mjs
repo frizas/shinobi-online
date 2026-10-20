@@ -54,6 +54,23 @@ function responseFrame(accepted, key) {
   return Buffer.concat([writeU16(body.length), body]);
 }
 
+function createTestGameServer() {
+  return net.createServer((socket) => {
+    let received = Buffer.alloc(0);
+    socket.on("data", (chunk) => {
+      received = Buffer.concat([received, chunk]);
+      if (received.length < 2) return;
+      const length = received.readUInt16LE(0);
+      if (received.length < length + 2) return;
+      const frame = received.subarray(2, length + 2);
+      assert.equal(frame.readUInt32LE(0), adler32(frame.subarray(4)));
+      assert.equal(received.includes(Buffer.from("shinobiuser")), false);
+      assert.equal(received.includes(Buffer.from("correct-horse")), false);
+      socket.end(responseFrame(true, packet.keyWords));
+    });
+  });
+}
+
 const fixedXtea = Buffer.from("00112233445566778899aabbccddeeff", "hex");
 const packet = createLoginPacket("shinobiuser", "correct-horse", "e".repeat(64), fixedXtea);
 assert.equal(packet.keyWords.length, 4);
@@ -75,20 +92,7 @@ assert.deepEqual(parseWebsiteLoginResponse(Buffer.concat([
 ])), { accepted: false, message: "Invalid username or password." });
 assert.throws(() => parseWebsiteLoginResponse(Buffer.concat([Buffer.from([0x67, 1]), writeString("create-character")])), /unexpected-login-response/);
 
-const gameServer = net.createServer((socket) => {
-  let received = Buffer.alloc(0);
-  socket.on("data", (chunk) => {
-    received = Buffer.concat([received, chunk]);
-    if (received.length < 2) return;
-    const length = received.readUInt16LE(0);
-    if (received.length < length + 2) return;
-    const frame = received.subarray(2, length + 2);
-    assert.equal(frame.readUInt32LE(0), adler32(frame.subarray(4)));
-    assert.equal(received.includes(Buffer.from("shinobiuser")), false);
-    assert.equal(received.includes(Buffer.from("correct-horse")), false);
-    socket.end(responseFrame(true, packet.keyWords));
-  });
-});
+const gameServer = createTestGameServer();
 gameServer.listen(0, "127.0.0.1");
 await once(gameServer, "listening");
 const port = gameServer.address().port;
@@ -105,7 +109,7 @@ try {
 const publicManifest = await readFile(new URL("../public/server.json", import.meta.url), "utf8");
 const publicSignature = await readFile(new URL("../public/server.sig", import.meta.url), "utf8");
 const verifiedManifest = verifySignedManifest(publicManifest, publicSignature);
-assert.equal(verifiedManifest.status, "maintenance");
+assert.ok(["maintenance", "online"].includes(verifiedManifest.status));
 
 const timestamp = String(Math.floor(Date.now() / 1000));
 const proof = await createLoginRequestProof(signingSecret, timestamp, "192.0.2.5", "shinobiuser", "correct-horse");
@@ -123,16 +127,38 @@ globalThis.fetch = async (url) => new Response(
   String(url).includes("server.sig") ? publicSignature : publicManifest,
   { status: 200, headers: { "content-type": "application/json" } }
 );
-const signedApiCall = await handler.fetch(new Request("https://shinobionline.vercel.app/api/website-login", {
-  method: "POST",
-  headers: {
-    "content-type": "application/json",
-    "x-shinobi-login-time": timestamp,
-    "x-shinobi-login-ip": "192.0.2.5",
-    "x-shinobi-login-proof": proof
-  },
-  body: JSON.stringify({ username: "shinobiuser", password: "correct-horse" })
-}));
-assert.equal(signedApiCall.status, 503, "a validly signed login fails closed while production is in maintenance");
+const apiGameServer = createTestGameServer();
+apiGameServer.listen(0, "127.0.0.1");
+await once(apiGameServer, "listening");
+const originalSocketConnect = net.Socket.prototype.connect;
+let apiConnectionCount = 0;
+net.Socket.prototype.connect = function (options, ...args) {
+  if (options && typeof options === "object" && options.host === verifiedManifest.loginHost && options.port === verifiedManifest.loginPort) {
+    apiConnectionCount += 1;
+    return originalSocketConnect.call(this, { ...options, host: "127.0.0.1", port: apiGameServer.address().port }, ...args);
+  }
+  return originalSocketConnect.call(this, options, ...args);
+};
+try {
+  const signedApiCall = await handler.fetch(new Request("https://shinobionline.vercel.app/api/website-login", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-shinobi-login-time": timestamp,
+      "x-shinobi-login-ip": "192.0.2.5",
+      "x-shinobi-login-proof": proof
+    },
+    body: JSON.stringify({ username: "shinobiuser", password: "correct-horse" })
+  }));
+  assert.equal(signedApiCall.status, 503, "the intentionally incomplete mock transport fails closed");
+  assert.equal(apiConnectionCount, verifiedManifest.status === "online" ? 1 : 0,
+    "only the signed online manifest may route an account check to the game endpoint");
+} finally {
+  net.Socket.prototype.connect = originalSocketConnect;
+  apiGameServer.close();
+  await once(apiGameServer, "close");
+}
+gameServer.close();
+await once(gameServer, "close");
 
-console.log("Website game-auth tests passed: RSA-framed credentials, XTEA result parsing, signed server metadata, middleware proof, and offline fail-closed behavior.");
+console.log("Website game-auth tests passed: RSA-framed credentials, XTEA result parsing, signed online/maintenance metadata, middleware proof, and status-appropriate login behavior.");
