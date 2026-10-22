@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "acceptanceSchemaVersion": 1,
   "serverName": "Leaf",
-  "status": "offline",
+  "status": "maintenance",
   "mode": "pinggy",
   "loginHost": "",
   "loginPort": 0,
@@ -12,7 +12,7 @@
   "onlineAcceptanceToken": "",
   "clientBuildToken": "",
   "releaseVersion": "",
-  "updatedAt": "2026-10-22T03:18:31.9025115Z",
-  "endpointRevision": 1071,
-  "message": "Server offline. Try again later."
+  "updatedAt": "2026-10-22T03:19:19.7306794Z",
+  "endpointRevision": 1072,
+  "message": "Maintenance: production acceptance checks are in progress. Login is temporarily disabled."
 }
