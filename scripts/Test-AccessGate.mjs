@@ -99,6 +99,31 @@ assert.match(cookie, /^__Host-shinobi_site_access=.*; Path=\/; HttpOnly; Secure;
 const sessionToken = cookie.split(";")[0].split("=")[1];
 assert.equal(await verifySessionToken(sessionToken, process.env.SITE_ACCESS_SIGNING_KEY), true);
 
+const acceptedLoginWithoutOrigin = await middleware(new Request("https://shinobionline.vercel.app/login", {
+  method: "POST",
+  headers: {
+    "content-type": "application/x-www-form-urlencoded",
+    "sec-fetch-site": "same-origin",
+    "x-vercel-forwarded-for": "192.0.2.13"
+  },
+  body: "username=shinobiuser&password=correct-horse"
+}));
+assert.equal(acceptedLoginWithoutOrigin.status, 303,
+  "a browser same-origin POST may use Sec-Fetch-Site when Origin is omitted");
+
+const rejectedCrossOriginLogin = await middleware(new Request("https://shinobionline.vercel.app/login", {
+  method: "POST",
+  headers: {
+    "content-type": "application/x-www-form-urlencoded",
+    origin: "https://attacker.example",
+    "sec-fetch-site": "cross-site",
+    "x-vercel-forwarded-for": "192.0.2.14"
+  },
+  body: "username=shinobiuser&password=correct-horse"
+}));
+assert.equal(rejectedCrossOriginLogin.status, 404,
+  "cross-origin login submissions remain rejected");
+
 const permittedDownload = await middleware(new Request("https://shinobionline.vercel.app/download", {
   headers: { cookie: `__Host-shinobi_site_access=${sessionToken}` }
 }));

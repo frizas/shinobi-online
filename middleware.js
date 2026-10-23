@@ -115,6 +115,22 @@ function safeReturnPath(value) {
   return value === "/download" ? value : "/download";
 }
 
+function isSameOriginLoginSubmission(request, requestUrl) {
+  const origin = request.headers.get("origin") || "";
+  if (origin) {
+    try {
+      if (new URL(origin).origin === requestUrl.origin) return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Some browser/privacy configurations omit Origin on same-origin form
+  // POSTs. Sec-Fetch-Site is browser-controlled and distinguishes that case
+  // from cross-site submissions.
+  return request.headers.get("sec-fetch-site") === "same-origin";
+}
+
 function loginPage(returnPath = "/download", errorKind = "") {
   const errorMessage = errorKind === "unavailable"
     ? "Game-account login is temporarily unavailable. Please try again while Shinobi Online is online."
@@ -381,12 +397,7 @@ export default async function middleware(request) {
   }
 
   if (pathname === "/login" && request.method === "POST") {
-    const origin = request.headers.get("origin") || "";
-    try {
-      if (new URL(origin).origin !== url.origin) return notFound();
-    } catch {
-      return notFound();
-    }
+    if (!isSameOriginLoginSubmission(request, url)) return notFound();
     if (isLoginBlocked(request)) {
       return loginPage("/download", true);
     }
