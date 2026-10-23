@@ -32,6 +32,11 @@ assert.match(loginHtml, /Game username/);
 assert.match(loginHtml, /current-password/);
 assert.match(loginHtml, /same username and password you use to log in to the game/i);
 assert.doesNotMatch(loginHtml, /Access key|legacy-shared-key-is-ignored/);
+const csrfTokenMatch = /name="csrfToken" value="([a-f0-9]{64})"/.exec(loginHtml);
+assert.ok(csrfTokenMatch, "the login form carries a per-page CSRF token");
+const csrfCookie = loginPage.headers.get("set-cookie");
+assert.match(csrfCookie || "", /^__Host-shinobi_login_csrf=[a-f0-9]{64}; Path=\/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200$/,
+  "the per-page CSRF token is bound to a secure host-only cookie");
 
 let lastLoginForward;
 globalThis.fetch = async (url, options) => {
@@ -83,12 +88,57 @@ const acceptedLoginWithoutOrigin = await middleware(new Request("https://shinobi
 assert.equal(acceptedLoginWithoutOrigin.status, 303,
   "a browser same-origin POST may use Sec-Fetch-Site when Origin is omitted");
 
+const acceptedLoginWithoutBrowserOriginHeaders = await middleware(new Request("https://shinobionline.vercel.app/login", {
+  method: "POST",
+  headers: {
+    "content-type": "application/x-www-form-urlencoded",
+    cookie: csrfCookie.split(";", 1)[0],
+    "x-vercel-forwarded-for": "192.0.2.15"
+  },
+  body: new URLSearchParams({
+    username: "shinobiuser",
+    password: "correct-horse",
+    csrfToken: csrfTokenMatch[1]
+  })
+}));
+assert.equal(acceptedLoginWithoutBrowserOriginHeaders.status, 303,
+  "a same-origin browser POST with Origin and Sec-Fetch-Site omitted can use its matching double-submit CSRF token");
+
+const acceptedLoginWithAliasOrigin = await middleware(new Request("https://shinobionline.vercel.app/login", {
+  method: "POST",
+  headers: {
+    "content-type": "application/x-www-form-urlencoded",
+    origin: "https://shinobi-online-git-main-frizas.vercel.app",
+    cookie: csrfCookie.split(";", 1)[0],
+    "x-vercel-forwarded-for": "192.0.2.17"
+  },
+  body: new URLSearchParams({
+    username: "shinobiuser",
+    password: "correct-horse",
+    csrfToken: csrfTokenMatch[1]
+  })
+}));
+assert.equal(acceptedLoginWithAliasOrigin.status, 303,
+  "a same-site deployment alias can use its matching per-form CSRF token when its Origin differs from the canonical site host");
+
+const rejectedLoginWithoutBrowserOriginOrCsrf = await middleware(new Request("https://shinobionline.vercel.app/login", {
+  method: "POST",
+  headers: {
+    "content-type": "application/x-www-form-urlencoded",
+    "x-vercel-forwarded-for": "192.0.2.16"
+  },
+  body: "username=shinobiuser&password=correct-horse"
+}));
+assert.equal(rejectedLoginWithoutBrowserOriginOrCsrf.status, 404,
+  "a form without same-origin headers must provide the matching CSRF token and cookie");
+
 const rejectedCrossOriginLogin = await middleware(new Request("https://shinobionline.vercel.app/login", {
   method: "POST",
   headers: {
     "content-type": "application/x-www-form-urlencoded",
     origin: "https://attacker.example",
     "sec-fetch-site": "cross-site",
+    cookie: csrfCookie.split(";", 1)[0],
     "x-vercel-forwarded-for": "192.0.2.14"
   },
   body: "username=shinobiuser&password=correct-horse"

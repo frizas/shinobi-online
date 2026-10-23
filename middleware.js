@@ -3,6 +3,8 @@ import { createSessionToken, verifySessionToken, createLoginRequestProof, SESSIO
 export { createSessionToken, verifySessionToken } from "./session.js";
 
 const COOKIE_NAME = "__Host-shinobi_site_access";
+const LOGIN_CSRF_COOKIE_NAME = "__Host-shinobi_login_csrf";
+const LOGIN_CSRF_TTL_SECONDS = 43200;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_BLOCK_MS = 30 * 60 * 1000;
 const LOGIN_FAILURE_LIMIT = 8;
@@ -33,6 +35,25 @@ function getCookie(request, name) {
     }
   }
   return "";
+}
+
+function createLoginCsrfToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+function matchesLoginCsrfToken(request, submittedToken) {
+  const cookieToken = getCookie(request, LOGIN_CSRF_COOKIE_NAME);
+  if (!/^[a-f0-9]{64}$/.test(cookieToken) ||
+      !/^[a-f0-9]{64}$/.test(submittedToken)) {
+    return false;
+  }
+  let difference = 0;
+  for (let index = 0; index < cookieToken.length; index += 1) {
+    difference |= cookieToken.charCodeAt(index) ^ submittedToken.charCodeAt(index);
+  }
+  return difference === 0;
 }
 
 function getClientAddress(request) {
@@ -131,7 +152,7 @@ function isSameOriginLoginSubmission(request, requestUrl) {
   return request.headers.get("sec-fetch-site") === "same-origin";
 }
 
-function loginPage(returnPath = "/download", errorKind = "") {
+function loginPage(returnPath = "/download", errorKind = "", csrfToken = createLoginCsrfToken()) {
   const errorMessage = errorKind === "unavailable"
     ? "Game-account login is temporarily unavailable. Please try again while Shinobi Online is online."
     : errorKind
@@ -170,6 +191,7 @@ function loginPage(returnPath = "/download", errorKind = "") {
     ${errorMessage ? `<p class="error" role="alert">${errorMessage}</p>` : ''}
     <form method="post" action="/login" autocomplete="on">
       <input type="hidden" name="returnTo" value="${safeReturnPath(returnPath)}">
+      <input type="hidden" name="csrfToken" value="${csrfToken}">
       <label for="username">Game username
         <input id="username" name="username" type="text" required autofocus autocomplete="username" minlength="3" maxlength="25" autocapitalize="none" spellcheck="false">
       </label>
@@ -183,7 +205,10 @@ function loginPage(returnPath = "/download", errorKind = "") {
 </body>
 </html>`, {
     status: 200,
-    headers: securityHeaders("text/html; charset=utf-8")
+    headers: {
+      ...securityHeaders("text/html; charset=utf-8"),
+      "set-cookie": `${LOGIN_CSRF_COOKIE_NAME}=${csrfToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${LOGIN_CSRF_TTL_SECONDS}`
+    }
   });
 }
 
@@ -252,18 +277,6 @@ export default async function middleware(request) {
   }
 
   if (pathname === "/login" && request.method === "POST") {
-    if (!isSameOriginLoginSubmission(request, url)) return notFound();
-    if (isLoginBlocked(request)) {
-      return loginPage("/download", true);
-    }
-    const clientAddress = getClientAddress(request);
-    if (!clientAddress) {
-      return new Response(loginPage("/download", "unavailable").body, {
-        status: 503,
-        headers: securityHeaders("text/html; charset=utf-8")
-      });
-    }
-
     const contentType = request.headers.get("content-type") || "";
     const contentLength = Number(request.headers.get("content-length") || "0");
     if (!contentType.toLowerCase().startsWith("application/x-www-form-urlencoded") ||
@@ -271,16 +284,38 @@ export default async function middleware(request) {
       return notFound();
     }
 
+    const clientAddress = getClientAddress(request);
+    if (!clientAddress) {
+      const response = loginPage("/download", "unavailable");
+      return new Response(response.body, {
+        status: 503,
+        headers: response.headers
+      });
+    }
+
     let username = "";
     let password = "";
     let returnTo = "/download";
+    let csrfToken = "";
     try {
       const form = await request.formData();
       username = String(form.get("username") || "").trim();
       password = String(form.get("password") || "");
       returnTo = safeReturnPath(String(form.get("returnTo") || ""));
+      csrfToken = String(form.get("csrfToken") || "");
     } catch {
       return notFound();
+    }
+
+    // Most browsers provide Origin or Sec-Fetch-Site. For privacy modes that
+    // omit both, accept the form only when its per-page token matches the
+    // host-only, SameSite=Strict cookie issued with the login page.
+    if (!isSameOriginLoginSubmission(request, url) &&
+        !matchesLoginCsrfToken(request, csrfToken)) {
+      return notFound();
+    }
+    if (isLoginBlocked(request)) {
+      return loginPage("/download", true);
     }
 
     if (!/^[A-Za-z0-9]{3,25}$/.test(username) || password.length < 4 || password.length > 64) {
