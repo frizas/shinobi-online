@@ -190,7 +190,7 @@ function loginPage(returnPath = "/download", errorKind = "") {
 function serverHeaders() {
   return {
     ...securityHeaders("application/json; charset=utf-8"),
-    "cache-control": "public, max-age=15, s-maxage=15, stale-while-revalidate=15",
+    "cache-control": "private, no-store, max-age=0",
     "access-control-allow-origin": "*"
   };
 }

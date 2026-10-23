@@ -143,6 +143,8 @@ globalThis.fetch = async (url) => new Response(
 );
 const publicServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
 assert.equal(publicServerManifest.status, 200);
+assert.match(publicServerManifest.headers.get("cache-control"), /no-store/i,
+  "signed server metadata must not cache server.json and server.sig independently");
 assert.equal(await publicServerManifest.text(), onlineManifestBytes);
 
 globalThis.fetch = async () => new Response('{"authenticated":false}', { status: 401 });
