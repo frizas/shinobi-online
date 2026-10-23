@@ -6,39 +6,6 @@ process.env.SITE_ACCESS_KEY = "legacy-shared-key-is-ignored";
 
 const { default: middleware, verifySessionToken } = await import("../middleware.js");
 
-const onlineManifest = {
-  schemaVersion: 2,
-  acceptanceSchemaVersion: 1,
-  serverName: "Leaf",
-  status: "online",
-  mode: "pinggy",
-  loginHost: "127.0.0.1",
-  loginPort: 7171,
-  gameHost: "127.0.0.1",
-  gamePort: 7172,
-  protocol: 854,
-  onlineAcceptanceToken: "d".repeat(64),
-  clientBuildToken: "e".repeat(64),
-  releaseVersion: "v0.4.69",
-  updatedAt: "2026-07-26T12:00:00.1234567Z",
-  endpointRevision: 1,
-  message: "Leaf is online."
-};
-const onlineManifestBytes = `${JSON.stringify(onlineManifest, null, 2)}\n`;
-const serverSignatureEnvelope = {
-  schemaVersion: 1,
-  algorithm: "RSASSA-PKCS1-v1_5-SHA256",
-  keyId: `sha256:${"a".repeat(64)}`,
-  manifestSha256: "b".repeat(64),
-  signature: "c".repeat(512)
-};
-const serverSignatureBytes = `${JSON.stringify(serverSignatureEnvelope, null, 2)}\n`;
-
-globalThis.fetch = async (url) => new Response(
-  String(url).includes("server.sig") ? serverSignatureBytes : onlineManifestBytes,
-  { status: 200, headers: { "content-type": "application/json" } }
-);
-
 const root = await middleware(new Request("https://shinobionline.vercel.app/"));
 assert.equal(root.headers.get("x-middleware-next"), "1", "the static landing page stays public");
 const landingHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
@@ -137,15 +104,19 @@ assert.match(logout.headers.get("set-cookie"), /Max-Age=0/);
 
 const publicLatestManifest = await middleware(new Request("https://shinobionline.vercel.app/public/v0.2/latest.json"));
 assert.equal(publicLatestManifest.headers.get("x-middleware-next"), "1");
-globalThis.fetch = async (url) => new Response(
-  String(url).includes("server.sig") ? serverSignatureBytes : onlineManifestBytes,
-  { status: 200, headers: { "content-type": "application/json" } }
-);
 const publicServerManifest = await middleware(new Request("https://shinobionline.vercel.app/public/server.json"));
-assert.equal(publicServerManifest.status, 200);
-assert.match(publicServerManifest.headers.get("cache-control"), /no-store/i,
-  "signed server metadata must not cache server.json and server.sig independently");
-assert.equal(await publicServerManifest.text(), onlineManifestBytes);
+const publicServerSignature = await middleware(new Request("https://shinobionline.vercel.app/public/server.sig"));
+assert.equal(publicServerManifest.headers.get("x-middleware-next"), "1",
+  "server.json is served from the same static deployment as its signature");
+assert.equal(publicServerSignature.headers.get("x-middleware-next"), "1",
+  "server.sig is served from the same static deployment as its manifest");
+const vercelConfig = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
+for (const source of ["/public/server.json", "/public/server.sig"]) {
+  const rule = vercelConfig.headers.find((entry) => entry.source === source);
+  assert.ok(rule, `${source} has an explicit cache policy`);
+  assert.match(rule.headers.find((header) => header.key === "Cache-Control")?.value || "", /no-store/i,
+    `${source} must not serve one half of a stale signed pair`);
+}
 
 globalThis.fetch = async () => new Response('{"authenticated":false}', { status: 401 });
 for (let attempt = 0; attempt < 8; attempt += 1) {

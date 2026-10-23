@@ -123,7 +123,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=30, s-maxage=30"
+          "value": "private, no-store, max-age=0"
         },
         {
           "key": "Content-Type",
@@ -136,7 +136,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=30, s-maxage=30"
+          "value": "private, no-store, max-age=0"
         },
         {
           "key": "Content-Type",
