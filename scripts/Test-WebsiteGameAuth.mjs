@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import { readFile } from "node:fs/promises";
 import net from "node:net";
-import { adler32, createLoginPacket, exchangeGameAccountAction, parseWebsiteLoginResponse, verifyGameCredentials, verifySignedManifest } from "../api/website-login.js";
+import { adler32, createLoginPacket, createWebsiteLoginHandler, exchangeGameAccountAction, parseWebsiteLoginResponse, verifyGameCredentials, verifySignedManifest } from "../api/website-login.js";
 import handler from "../api/website-login.js";
 import { createLoginRequestProof, verifyLoginRequestProof } from "../session.js";
 
@@ -123,24 +123,24 @@ const directApiCall = await handler.fetch(new Request("https://shinobionline.ver
 }));
 assert.equal(directApiCall.status, 404, "the public verifier rejects requests not signed by site middleware");
 
+delete process.env.SITE_ACCOUNT_SNAPSHOT_PRIVATE_KEY_PEM;
+const originalFetch = globalThis.fetch;
 globalThis.fetch = async (url) => new Response(
   String(url).includes("server.sig") ? publicSignature : publicManifest,
   { status: 200, headers: { "content-type": "application/json" } }
 );
-const apiGameServer = createTestGameServer();
-apiGameServer.listen(0, "127.0.0.1");
-await once(apiGameServer, "listening");
-const originalSocketConnect = net.Socket.prototype.connect;
-let apiConnectionCount = 0;
-net.Socket.prototype.connect = function (options, ...args) {
-  if (options && typeof options === "object" && options.host === verifiedManifest.loginHost && options.port === verifiedManifest.loginPort) {
-    apiConnectionCount += 1;
-    return originalSocketConnect.call(this, { ...options, host: "127.0.0.1", port: apiGameServer.address().port }, ...args);
-  }
-  return originalSocketConnect.call(this, options, ...args);
+let fallbackCredentials;
+const fallbackHandler = {
+  fetch: createWebsiteLoginHandler({
+    loadAccountSnapshot: async () => { throw new Error("account-snapshot-key-unavailable"); },
+    verifyLiveGameCredentials: async (...credentials) => {
+      fallbackCredentials = credentials;
+      return { accepted: true, message: "Login accepted." };
+    }
+  })
 };
 try {
-  const signedApiCall = await handler.fetch(new Request("https://shinobionline.vercel.app/api/website-login", {
+  const signedApiCall = await fallbackHandler.fetch(new Request("https://shinobionline.vercel.app/api/website-login", {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -150,15 +150,15 @@ try {
     },
     body: JSON.stringify({ username: "shinobiuser", password: "correct-horse" })
   }));
-  assert.equal(signedApiCall.status, 503, "the intentionally incomplete mock transport fails closed");
-  assert.equal(apiConnectionCount, verifiedManifest.status === "online" ? 1 : 0,
-    "only the signed online manifest may route an account check to the game endpoint");
+  const shouldReachGame = verifiedManifest.status === "online";
+  assert.equal(signedApiCall.status, shouldReachGame ? 200 : 503,
+    "until the Vercel snapshot key is configured, login preserves its signed live-server behavior");
+  assert.deepEqual(fallbackCredentials, shouldReachGame
+    ? [verifiedManifest.loginHost, verifiedManifest.loginPort, "shinobiuser", "correct-horse", verifiedManifest.clientBuildToken]
+    : undefined,
+  "the live-server fallback is used only while the account snapshot key is not configured and the signed manifest is online");
 } finally {
-  net.Socket.prototype.connect = originalSocketConnect;
-  apiGameServer.close();
-  await once(apiGameServer, "close");
+  globalThis.fetch = originalFetch;
 }
-gameServer.close();
-await once(gameServer, "close");
 
-console.log("Website game-auth tests passed: RSA-framed credentials, XTEA result parsing, signed online/maintenance metadata, middleware proof, and status-appropriate login behavior.");
+console.log("Website game-auth protocol tests passed: RSA-framed credentials, XTEA result parsing, signed server metadata, middleware proof validation, and the pre-configuration live-server fallback.");

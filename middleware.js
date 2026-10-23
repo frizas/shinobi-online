@@ -205,6 +205,13 @@ export default async function middleware(request) {
     return next();
   }
 
+  if (request.method === "GET" &&
+      (pathname === "/public/account-verifiers.enc.json" || pathname === "/public/account-verifiers.sig.json")) {
+    // This pair is encrypted for the website and signed by the private
+    // operator key, so it can be served statically without exposing hashes.
+    return next();
+  }
+
   // Public static landing assets do not include live release/download details.
   if (request.method === "GET" &&
       (pathname === "/" || pathname === "/styles.css" || pathname === "/favicon.ico" ||
@@ -212,8 +219,8 @@ export default async function middleware(request) {
     return next();
   }
 
-  // The Node function validates credentials against the running game's login
-  // service. The middleware owns throttling and session issuance.
+  // The Node function validates credentials against the encrypted account
+  // snapshot. The middleware owns throttling and session issuance.
   if (pathname === "/api/website-login" && request.method === "POST") {
     return next();
   }

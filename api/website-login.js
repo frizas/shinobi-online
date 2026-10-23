@@ -2,6 +2,7 @@ import net from "node:net";
 import { createHash, randomBytes, timingSafeEqual, verify as verifySignature } from "node:crypto";
 import signingKey from "../public/manifest-signing-key.json" with { type: "json" };
 import { verifyLoginRequestProof } from "../session.js";
+import { getAccountVerifierSnapshot, verifySnapshotPassword } from "./account-verifier.js";
 
 const LOGIN_TIMEOUT_MS = 6000;
 const MAX_MANIFEST_BYTES = 16384;
@@ -283,7 +284,11 @@ export function verifySignedManifest(manifestText, signatureText) {
   return manifest;
 }
 
-async function handle(request) {
+export function createWebsiteLoginHandler({
+  loadAccountSnapshot = getAccountVerifierSnapshot,
+  verifyLiveGameCredentials = verifyGameCredentials
+} = {}) {
+  return async function handle(request) {
   if (request.method !== "POST") return textResponse(405, '{"error":"method-not-allowed"}');
   const contentLength = Number(request.headers.get("content-length") || "0");
   if (!Number.isFinite(contentLength) || contentLength > 1024) return textResponse(400, '{"error":"invalid-request"}');
@@ -312,23 +317,41 @@ async function handle(request) {
     return textResponse(404, '{"error":"not-found"}');
   }
 
-  let manifest;
+  let snapshot;
   try {
-    manifest = await getSignedOnlineServerManifest(new URL(request.url).origin);
-  } catch {
+    snapshot = await loadAccountSnapshot(new URL(request.url).origin);
+  } catch (error) {
+    if (error?.message === "account-snapshot-key-unavailable") {
+      try {
+        const manifest = await getSignedOnlineServerManifest(new URL(request.url).origin);
+        const result = await verifyLiveGameCredentials(
+          manifest.loginHost,
+          manifest.loginPort,
+          username,
+          password,
+          manifest.clientBuildToken
+        );
+        return result.accepted
+          ? textResponse(200, '{"authenticated":true}')
+          : textResponse(401, '{"authenticated":false}');
+      } catch {
+        return textResponse(503, '{"error":"login-unavailable"}');
+      }
+    }
     return textResponse(503, '{"error":"login-unavailable"}');
   }
 
   try {
-    const result = await verifyGameCredentials(manifest.loginHost, manifest.loginPort, username, password, manifest.clientBuildToken);
-    return result.accepted
+    const authenticated = await verifySnapshotPassword(snapshot, username, password);
+    return authenticated
       ? textResponse(200, '{"authenticated":true}')
       : textResponse(401, '{"authenticated":false}');
   } catch {
     return textResponse(503, '{"error":"login-unavailable"}');
   }
+  };
 }
 
-export default { fetch: handle };
+export default { fetch: createWebsiteLoginHandler() };
 
 export { createLoginPacket, adler32, decryptXtea, verifyGameCredentials, getSignedOnlineServerManifest };

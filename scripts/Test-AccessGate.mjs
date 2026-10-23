@@ -6,6 +6,11 @@ process.env.SITE_ACCESS_KEY = "legacy-shared-key-is-ignored";
 
 const { default: middleware, verifySessionToken } = await import("../middleware.js");
 
+for (const path of ["/public/account-verifiers.enc.json", "/public/account-verifiers.sig.json"]) {
+  const response = await middleware(new Request(`https://shinobionline.vercel.app${path}`));
+  assert.equal(response.headers.get("x-middleware-next"), "1", `${path} is served as a static encrypted snapshot asset`);
+}
+
 const root = await middleware(new Request("https://shinobionline.vercel.app/"));
 assert.equal(root.headers.get("x-middleware-next"), "1", "the static landing page stays public");
 const landingHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");

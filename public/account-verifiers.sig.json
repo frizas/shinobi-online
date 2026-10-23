@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "RSASSA-PKCS1-v1_5-SHA256",
+  "keyId": "sha256:309058338653b3ddf23749a729647be5d1657b15e101890cff2de42d98a13e5e",
+  "manifestSha256": "f1e62fe557da3f61e2f223c1f29e946984b65c8b28624f116361ffca07b63411",
+  "signature": "pDoIaIKsyHXZKU/V8MfiElTsNPB3erWMnhpDawk6Lfkl5X7y4lixicjjorpJ8HlQMEDQVlBd0/CSokLiZeY0px6yxfB18w2DVA7RupH9jtKS840Ooy9NiTfof1YWz9owvRcTs1ixnP1cCMb3InJkhOgsTaaBq5U+vB8M+tKm+GEA+eLayn+ceseQYN5P/Y0Qu/PDsnfTbymygubkHRQHK7LbVB20NpVi8ohjrxtuli7H9HNgpP9XPBhJmBDa3bjZaYKyQY8Vdj9YeeF9LGUtqHrkHGrmBiaYwNj2w2Unf/9EOXPC6Xt+53Ct1wl7dG9VPq14Lsn4vrDeKipuoauJDodVRLE+M+lzVFljKmPj1NyyeZTs5nvckJs6QPpPQHwd6jPP1FnQoBpMFjTXtBHza7mCsIVgpt4RwxGYHt/k6GGxzQ5YmdMw8wf2m1qANMoJRT2YepCjAxUfOczgwmT7QlqvNaHCQN0+vxNB3azo03l3y/NAY3u9tOvn/EmiKC3n"
+}
